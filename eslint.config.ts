@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
+import importPlugin from 'eslint-plugin-import-x';
 import vuePlugin from 'eslint-plugin-vue';
 import tseslint from 'typescript-eslint';
 import vueParser from 'vue-eslint-parser';
@@ -21,7 +22,10 @@ export default tseslint.config(
     },
   },
   {
-    plugins: { '@stylistic': stylistic },
+    plugins: {
+      '@stylistic': stylistic,
+      import: importPlugin,
+    },
     rules: {
       '@stylistic/indent': ['error', 2],
       '@stylistic/quotes': ['error', 'single'],
@@ -31,11 +35,27 @@ export default tseslint.config(
       '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: true }],
       '@stylistic/quote-props': ['error', 'as-needed'],
       '@stylistic/block-spacing': ['error', 'always'],
-      '@typescript-eslint/no-unused-vars': [
+      '@stylistic/operator-linebreak': ['error', 'before', { overrides: { '=': 'after' } }],
+      'import/order': [
         'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+          ],
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+        },
       ],
-      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/explicit-function-return-type': 'off',
     },
   },
 );

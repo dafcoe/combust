@@ -1,5 +1,5 @@
-import { IFC_COUNTRY_NAME, type IfcFuel } from './iberian-fuel-client.type.ts';
 import type { FuelPrices } from './fuel.type.ts';
+import { IFC_COUNTRY_NAME, type IfcFuel } from './iberian-fuel-client.type.ts';
 
 export interface StationAddressCoordinates {
   latitude: number;

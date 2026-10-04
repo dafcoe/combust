@@ -1,5 +1,5 @@
 import { computed, ref, watch } from 'vue';
-import { useUserSettings } from './useUserSettings.ts';
+import { useUserSettings } from '../use-user-settings/useUserSettings.ts';
 import type { EffectiveThemeMode } from '@/types';
 
 const { theme: userSettingsTheme, setTheme } = useUserSettings();

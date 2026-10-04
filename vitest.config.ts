@@ -19,6 +19,7 @@ export default mergeConfig(
           'src/**/*.spec.ts',
           'src/**/*.type.ts',
           'src/**/*.constant.ts',
+          'src/**/*.fixture.ts',
         ],
       },
     },

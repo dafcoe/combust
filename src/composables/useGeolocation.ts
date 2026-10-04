@@ -2,7 +2,7 @@ import { readonly, ref } from 'vue';
 import { DEFAULT_COORDS } from '@/constants';
 import type { GeolocationCoordinates, GeolocationError, GeolocationPermissionStatus } from '@/types';
 
-const coords = ref<GeolocationCoordinates>(DEFAULT_COORDS);
+const coords = ref<GeolocationCoordinates>({ ...DEFAULT_COORDS });
 const permissionStatus = ref<GeolocationPermissionStatus>('prompt');
 const isLocating = ref(false);
 const error = ref<GeolocationError | null>(null);
@@ -14,7 +14,7 @@ function updateState(
   newPermissionStatus: GeolocationPermissionStatus,
   newError: GeolocationError | null = null,
 ): void {
-  coords.value = newCoords;
+  coords.value = { ...newCoords };
   permissionStatus.value = newPermissionStatus;
   isLocating.value = false;
   error.value = newError;

@@ -27,6 +27,9 @@ export default tseslint.config(
       import: importPlugin,
     },
     rules: {
+      // eslint
+      'no-empty': ['error', { allowEmptyCatch: true }],
+      // stylistic
       '@stylistic/indent': ['error', 2],
       '@stylistic/quotes': ['error', 'single'],
       '@stylistic/semi': ['error', 'always'],
@@ -36,6 +39,7 @@ export default tseslint.config(
       '@stylistic/quote-props': ['error', 'as-needed'],
       '@stylistic/block-spacing': ['error', 'always'],
       '@stylistic/operator-linebreak': ['error', 'before', { overrides: { '=': 'after' } }],
+      // import-x
       'import/order': [
         'error',
         {
@@ -53,6 +57,7 @@ export default tseslint.config(
           },
         },
       ],
+      // typescript
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',

@@ -13,6 +13,13 @@ export default mergeConfig(
       coverage: {
         provider: 'v8',
         reporter: ['text', 'json', 'html'],
+        exclude: [
+          'src/assets/*',
+          'src/**/index.ts',
+          'src/**/*.spec.ts',
+          'src/**/*.type.ts',
+          'src/**/*.constant.ts',
+        ],
       },
     },
   }),

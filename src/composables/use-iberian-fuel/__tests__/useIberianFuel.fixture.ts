@@ -60,9 +60,44 @@ export const ifcStationRepsolMadridFixture: IfcStation = {
   ],
 };
 
+export const ifcStationBpLisboaFixture: IfcStation = {
+  id: 'PT-9999',
+  name: 'BP Lisboa Rossio',
+  brand: 'BP',
+  address: {
+    street: 'Praça Rossio 5',
+    postalCode: '1100-200',
+    town: 'Lisboa',
+    municipality: 'Lisboa',
+    district: 'Lisboa',
+    country: IFC_COUNTRY_NAME.PT,
+    latitude: 38.7139,
+    longitude: -9.1394,
+  },
+  fuels: [
+    {
+      id: '5',
+      name: IFC_FUEL_NAME.GASOLINE_95,
+      price: 1.829,
+      updatedAt: new Date('2026-10-04T10:00:00Z'),
+    },
+    {
+      id: '6',
+      name: IFC_FUEL_NAME.DIESEL,
+      price: 1.649,
+      updatedAt: new Date('2026-10-04T10:00:00Z'),
+    },
+  ],
+};
+
 export const ifcStationsFixture: IfcStation[] = [
   ifcStationGalpLisboaFixture,
   ifcStationRepsolMadridFixture,
+];
+
+export const ifcStationsWithBpFixture: IfcStation[] = [
+  ifcStationBpLisboaFixture,
+  ifcStationGalpLisboaFixture,
 ];
 
 export const stationGalpLisboaFixture: Station = {

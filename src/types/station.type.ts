@@ -1,6 +1,6 @@
 import type { FuelPrices } from './fuel.type.ts';
 import type { GeolocationCoordinates } from './geolocation.type.ts';
-import { IFC_COUNTRY_NAME, type IfcFuel } from './iberian-fuel-client.type.ts';
+import { IFC_COUNTRY_NAME } from './iberian-fuel-client.type.ts';
 
 export type StationAddress = {
   street: string;
@@ -21,5 +21,4 @@ export type Station = {
   openingHours?: string;
   distanceKm?: number;
   isOpen?: boolean;
-  rawFuels?: IfcFuel[];
 };

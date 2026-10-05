@@ -2,7 +2,7 @@ import {
   resetIberianFuelState,
   useIberianFuel,
 } from '../useIberianFuel.ts';
-import { ifcStationsFixture, stationsFixture } from './useIberianFuel.fixture.ts';
+import { ifcStationsFixture, stationGalpLisboaFixture, stationsFixture } from './useIberianFuel.fixture.ts';
 import { IberianFuelClient } from '@/types';
 
 vi.mock('@/types', async (importOriginal) => {
@@ -77,5 +77,23 @@ describe('useIberianFuel', () => {
     expect(error.value).toBe('Failed to fetch fuel iberian fuel client stations');
     expect(stations.value).toEqual([]);
     expect(lastFetchedAt.value).toBeNull();
+  });
+
+  it('should compute distances from a given origin for all stations', async () => {
+    // Assemble
+    MockedIberianFuelClient.prototype.getStations = vi.fn().mockResolvedValue(ifcStationsFixture);
+    const { stations, fetchStations, updateStationsDistance } = useIberianFuel();
+    const stationGalpLisboaLocation = stationGalpLisboaFixture.location;
+
+    // Act
+    await fetchStations();
+    updateStationsDistance(stationGalpLisboaLocation);
+
+    // Assert — Galp Lisboa should be 0 km (same coords)
+    expect(stations.value[0].distanceKm).toBe(0);
+
+    // Assert — Repsol Madrid should be ~500 km from Lisbon
+    expect(stations.value[1].distanceKm).toBeGreaterThan(490);
+    expect(stations.value[1].distanceKm).toBeLessThan(510);
   });
 });

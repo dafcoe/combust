@@ -1,9 +1,11 @@
 import { readonly, ref } from 'vue';
+import { mapIfcStationsToStations } from '@/mappers';
 import {
+  type GeolocationCoordinates,
   IberianFuelClient,
   type Station,
 } from '@/types';
-import { mapIfcStationsToStations } from '@/mappers';
+import { haversineDistanceKm } from '@/utils';
 
 const ifcClient = new IberianFuelClient();
 
@@ -28,6 +30,13 @@ async function fetchStations(): Promise<void> {
   }
 }
 
+function updateStationsDistance(originLocation: GeolocationCoordinates): void {
+  stations.value = stations.value.map((station) => ({
+    ...station,
+    distanceKm: haversineDistanceKm(originLocation, station.location),
+  }));
+}
+
 export function resetIberianFuelState(): void {
   stations.value = [];
   isLoading.value = false;
@@ -42,5 +51,6 @@ export function useIberianFuel() {
     error: readonly(error),
     lastFetchedAt: readonly(lastFetchedAt),
     fetchStations,
+    updateStationsDistance,
   };
 }

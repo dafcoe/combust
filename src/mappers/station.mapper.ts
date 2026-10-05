@@ -1,5 +1,5 @@
-import { type FuelPrices, IFC_FUEL_NAME, type IfcStation, type Station } from '@/types';
 import type { Fuel } from '@dafcoe/iberian-fuel-client';
+import { type FuelPrices, IFC_FUEL_NAME, type IfcStation, type Station } from '@/types';
 
 function mapIfcStationFuelsToFuelPrices(ifcStationFuels: Fuel[]): FuelPrices {
   const prices: FuelPrices = {

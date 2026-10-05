@@ -58,4 +58,38 @@ describe('haversineDistanceKm', () => {
     expect(distance).toBeGreaterThan(340);
     expect(distance).toBeLessThan(350);
   });
+
+  describe('defensive coordinate validation', () => {
+    const validPoint: GeolocationCoordinates = { latitude: 38.7223, longitude: -9.1393 };
+
+    it('should return NaN when latitude is out of range [-90, 90]', () => {
+      const invalidNorth: GeolocationCoordinates = { latitude: 91, longitude: 0 };
+      const invalidSouth: GeolocationCoordinates = { latitude: -90.1, longitude: 0 };
+
+      expect(Number.isNaN(haversineDistanceKm(invalidNorth, validPoint))).toBe(true);
+      expect(Number.isNaN(haversineDistanceKm(validPoint, invalidSouth))).toBe(true);
+    });
+
+    it('should return NaN when longitude is out of range [-180, 180]', () => {
+      const invalidEast: GeolocationCoordinates = { latitude: 0, longitude: 180.1 };
+      const invalidWest: GeolocationCoordinates = { latitude: 0, longitude: -181 };
+
+      expect(Number.isNaN(haversineDistanceKm(invalidEast, validPoint))).toBe(true);
+      expect(Number.isNaN(haversineDistanceKm(validPoint, invalidWest))).toBe(true);
+    });
+
+    it('should return NaN when coordinates contain NaN or Infinity', () => {
+      const nanPoint: GeolocationCoordinates = { latitude: Number.NaN, longitude: 0 };
+      const infinityPoint: GeolocationCoordinates = { latitude: 0, longitude: Number.POSITIVE_INFINITY };
+
+      expect(Number.isNaN(haversineDistanceKm(nanPoint, validPoint))).toBe(true);
+      expect(Number.isNaN(haversineDistanceKm(validPoint, infinityPoint))).toBe(true);
+    });
+
+    it('should return NaN when coordinate is null, undefined, or not an object', () => {
+      expect(Number.isNaN(haversineDistanceKm(null as unknown as GeolocationCoordinates, validPoint))).toBe(true);
+      expect(Number.isNaN(haversineDistanceKm(validPoint, undefined as unknown as GeolocationCoordinates))).toBe(true);
+      expect(Number.isNaN(haversineDistanceKm('invalid' as unknown as GeolocationCoordinates, validPoint))).toBe(true);
+    });
+  });
 });

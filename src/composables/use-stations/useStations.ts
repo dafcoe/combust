@@ -1,26 +1,26 @@
-import { computed, readonly, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useGeolocation } from '@/composables/use-geolocation/useGeolocation';
 import { useIberianFuel } from '@/composables/use-iberian-fuel/useIberianFuel';
 import { useUserSettings } from '@/composables/use-user-settings/useUserSettings';
 import type { FuelType, GeolocationCoordinates, SortMode, Station } from '@/types';
 import { haversineDistanceKm } from '@/utils';
 
-const customOrigin = ref<GeolocationCoordinates | null>(null);
+const originCoords = ref<GeolocationCoordinates | null>(null);
 
-const { coords } = useGeolocation();
-const { stations, isLoading, error, lastFetchedAt, fetchStations } = useIberianFuel();
+const { coords: geolocationCoords } = useGeolocation();
+const { stations: allStations, isLoading, error, lastFetchedAt, fetchStations } = useIberianFuel();
 const { fuelType, radiusKm, sortBy } = useUserSettings();
 
-const originLocation = computed<GeolocationCoordinates>(() => customOrigin.value ?? coords.value);
+const computedOriginCoords = computed<GeolocationCoordinates>(() => originCoords.value ?? geolocationCoords.value);
 
 const stationsWithDistance = computed<Station[]>(() => {
-  return stations.value.map((station) => ({
+  return allStations.value.map((station) => ({
     ...station,
-    distanceKm: haversineDistanceKm(originLocation.value, station.location),
+    distanceKm: haversineDistanceKm(computedOriginCoords.value, station.location),
   }));
 });
 
-const visibleStations = computed<Station[]>(() => {
+const stations = computed<Station[]>(() => {
   const filtered = filterStations(stationsWithDistance.value, fuelType.value, radiusKm.value);
   return sortStations(filtered, fuelType.value, sortBy.value);
 });
@@ -58,22 +58,21 @@ function sortStations(
   });
 }
 
-function setOriginLocation(newOrigin: GeolocationCoordinates | null): void {
-  customOrigin.value = newOrigin ? { ...newOrigin } : null;
+function setOriginCoords(newOrigin: GeolocationCoordinates | null): void {
+  originCoords.value = newOrigin ? { ...newOrigin } : null;
 }
 
 export function resetStationsState(): void {
-  customOrigin.value = null;
+  originCoords.value = null;
 }
 
 export function useStations() {
   return {
-    originLocation: readonly(originLocation),
-    visibleStations,
+    stations,
     isLoading,
     error,
     lastFetchedAt,
     fetchStations,
-    setOriginLocation,
+    setOriginLocation: setOriginCoords,
   };
 }

@@ -7,7 +7,7 @@ export const FUEL_TYPE_TO_IFC_FUEL_NAME: Record<FuelType, IFC_FUEL_NAME> = {
   gasoline95: IFC_FUEL_NAME.GASOLINE_95,
   gasoline98: IFC_FUEL_NAME.GASOLINE_98,
   diesel: IFC_FUEL_NAME.DIESEL,
-  lgp: IFC_FUEL_NAME.LPG,
+  lpg: IFC_FUEL_NAME.LPG,
 } as const;
 
 /**
@@ -17,5 +17,5 @@ export const FUEL_TYPE_LABELS: Record<FuelType, string> = {
   gasoline95: 'Gasoline 95',
   gasoline98: 'Gasoline 98',
   diesel: 'Diesel',
-  lgp: 'LPG',
+  lpg: 'LPG',
 } as const;

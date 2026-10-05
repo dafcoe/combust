@@ -4,12 +4,14 @@ import {
 } from '../useIberianFuel.ts';
 import {
   ifcStationsFixture,
-  stationsFixture,
-} from './useIberianFuel.fixture.ts';
-import { IberianFuelClient } from '@/types';
+  stationGalpLisboaFixture,
+  stationRepsolMadridFixture,
+} from '@/fixtures';
+import { IberianFuelClient, type Station } from '@/types';
 
 vi.mock('@/types', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/types')>();
+
   return {
     ...actual,
     IberianFuelClient: vi.fn(),
@@ -18,6 +20,11 @@ vi.mock('@/types', async (importOriginal) => {
 
 const MockedIberianFuelClient = vi.mocked(IberianFuelClient);
 
+export const stationsFixture: Station[] = [
+  stationGalpLisboaFixture,
+  stationRepsolMadridFixture,
+];
+
 describe('useIberianFuel', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -25,7 +32,7 @@ describe('useIberianFuel', () => {
   });
 
   it('should initialize with default empty state', () => {
-    // Assemble & Act
+    // Assemble
     const { stations, isLoading, error, lastFetchedAt } = useIberianFuel();
 
     // Assert
@@ -77,8 +84,35 @@ describe('useIberianFuel', () => {
 
     // Assert
     expect(isLoading.value).toBe(false);
-    expect(error.value).toBe('Failed to fetch fuel iberian fuel client stations');
+    expect(error.value).toBe('Failed to fetch iberian fuel client stations');
     expect(stations.value).toEqual([]);
     expect(lastFetchedAt.value).toBeNull();
+  });
+
+  it('should not trigger a new fetch if already loading', async () => {
+    // Assemble
+    let resolveFirstFetch: (value: typeof ifcStationsFixture) => void = () => {};
+    const firstFetchPromise = new Promise<typeof ifcStationsFixture>((resolve) => {
+      resolveFirstFetch = resolve;
+    });
+    const getStationsMock = vi.fn().mockReturnValue(firstFetchPromise);
+    MockedIberianFuelClient.prototype.getStations = getStationsMock;
+
+    const { isLoading, fetchStations } = useIberianFuel();
+
+    // Act
+    const initialCall = fetchStations();
+    expect(isLoading.value).toBe(true);
+
+    // Second call while first is still pending
+    const secondCall = fetchStations();
+
+    // Assert — getStations should only have been called once
+    expect(getStationsMock).toHaveBeenCalledTimes(1);
+
+    // Complete the first call
+    resolveFirstFetch(ifcStationsFixture);
+    await Promise.all([initialCall, secondCall]);
+    expect(isLoading.value).toBe(false);
   });
 });

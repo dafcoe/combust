@@ -3,11 +3,10 @@ import {
   useStations,
 } from '../useStations.ts';
 import {
-  stationsFixture,
   stationBpLisboaFixture,
   stationGalpLisboaFixture,
   stationRepsolMadridFixture,
-} from './useStations.fixture.ts';
+} from '@/fixtures';
 import type { FuelType, GeolocationCoordinates, SortMode, Station } from '@/types';
 
 const {
@@ -22,6 +21,7 @@ const {
   mockFetchStations,
 } = await vi.hoisted(async () => {
   const { ref: vueRef } = await import('vue');
+
   return {
     mockCoords: vueRef<GeolocationCoordinates>({ latitude: 38.7223, longitude: -9.1393 }),
     mockRawStations: vueRef<Station[]>([]),
@@ -59,6 +59,12 @@ vi.mock('@/composables/use-user-settings/useUserSettings', () => ({
   }),
 }));
 
+export const stationsFixture: Station[] = [
+  stationGalpLisboaFixture,
+  stationBpLisboaFixture,
+  stationRepsolMadridFixture,
+];
+
 describe('useStations', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -77,11 +83,11 @@ describe('useStations', () => {
     // Assemble — radius 600 km so all stations with matching fuel are visible
     mockRadiusKm.value = 600;
     mockFuelType.value = 'diesel';
-    const { visibleStations } = useStations();
+    const { stations } = useStations();
 
     // Assert — Galp is at exact user location (0 km), BP is ~0.93 km away
-    const galp = visibleStations.value.find((s) => s.id === stationGalpLisboaFixture.id);
-    const bp = visibleStations.value.find((s) => s.id === stationBpLisboaFixture.id);
+    const galp = stations.value.find((s) => s.id === stationGalpLisboaFixture.id);
+    const bp = stations.value.find((s) => s.id === stationBpLisboaFixture.id);
 
     expect(galp?.distanceKm).toBe(0);
     expect(bp?.distanceKm).toBeGreaterThan(0.9);
@@ -90,7 +96,7 @@ describe('useStations', () => {
 
   it('should update distances and filter accordingly when custom origin location is set', () => {
     // Assemble
-    const { visibleStations, setOriginLocation, originLocation } = useStations();
+    const { stations, setOriginLocation } = useStations();
     const madridCoords = { latitude: 40.4200, longitude: -3.7050 };
     mockFuelType.value = 'gasoline98';
     mockRadiusKm.value = 50;
@@ -99,9 +105,8 @@ describe('useStations', () => {
     setOriginLocation(madridCoords);
 
     // Assert — Repsol Madrid is now at 0 km and within the 50 km radius
-    expect(originLocation.value).toEqual(madridCoords);
-    expect(visibleStations.value.length).toBe(1);
-    const repsol = visibleStations.value[0];
+    expect(stations.value.length).toBe(1);
+    const repsol = stations.value[0];
     expect(repsol.id).toBe(stationRepsolMadridFixture.id);
     expect(repsol.distanceKm).toBe(0);
   });
@@ -109,82 +114,84 @@ describe('useStations', () => {
   it('should filter stations by radius', () => {
     // Assemble — Lisboa coords, radius 10 km
     mockRadiusKm.value = 10;
-    const { visibleStations } = useStations();
+    const { stations } = useStations();
 
     // Assert — Repsol Madrid (>490 km) should be excluded
-    const repsol = visibleStations.value.find((s) => s.id === stationRepsolMadridFixture.id);
+    const repsol = stations.value.find((s) => s.id === stationRepsolMadridFixture.id);
     expect(repsol).toBeUndefined();
-    expect(visibleStations.value.length).toBe(2);
+    expect(stations.value.length).toBe(2);
   });
 
   it('should filter stations by fuel type availability', () => {
     // Assemble — search for gasoline98 within a large radius
     mockRadiusKm.value = 600;
     mockFuelType.value = 'gasoline98';
-    const { visibleStations } = useStations();
+    const { stations } = useStations();
 
     // Assert — only Repsol Madrid has gasoline98
-    expect(visibleStations.value.length).toBe(1);
-    expect(visibleStations.value[0].id).toBe(stationRepsolMadridFixture.id);
+    expect(stations.value.length).toBe(1);
+    expect(stations.value[0].id).toBe(stationRepsolMadridFixture.id);
   });
 
   it('should sort visible stations by price (ascending)', () => {
     // Assemble — both Galp (1.759) and BP (1.829) have gasoline95 and are within 10 km
     mockFuelType.value = 'gasoline95';
     mockSortBy.value = 'price';
-    const { visibleStations } = useStations();
+    const { stations } = useStations();
 
     // Assert — Galp should be first because it is cheaper
-    expect(visibleStations.value.length).toBe(2);
-    expect(visibleStations.value[0].id).toBe(stationGalpLisboaFixture.id);
-    expect(visibleStations.value[1].id).toBe(stationBpLisboaFixture.id);
+    expect(stations.value.length).toBe(2);
+    expect(stations.value[0].id).toBe(stationGalpLisboaFixture.id);
+    expect(stations.value[1].id).toBe(stationBpLisboaFixture.id);
   });
 
   it('should sort visible stations by distance (ascending)', () => {
     // Assemble — user at Galp Lisboa (0 km), BP is ~0.93 km away
     mockFuelType.value = 'gasoline95';
     mockSortBy.value = 'distance';
-    const { visibleStations } = useStations();
+    const { stations } = useStations();
 
     // Assert — Galp (0 km) before BP (~0.93 km)
-    expect(visibleStations.value.length).toBe(2);
-    expect(visibleStations.value[0].id).toBe(stationGalpLisboaFixture.id);
-    expect(visibleStations.value[1].id).toBe(stationBpLisboaFixture.id);
+    expect(stations.value.length).toBe(2);
+    expect(stations.value[0].id).toBe(stationGalpLisboaFixture.id);
+    expect(stations.value[1].id).toBe(stationBpLisboaFixture.id);
   });
 
   it('should reactively update visible stations when settings change', () => {
     // Assemble
     mockRadiusKm.value = 10;
     mockFuelType.value = 'gasoline95';
-    const { visibleStations } = useStations();
+    const { stations } = useStations();
 
-    expect(visibleStations.value.length).toBe(2);
+    expect(stations.value.length).toBe(2);
 
-    // Act — change fuel type to LGP (none in Lisbon within 10 km)
-    mockFuelType.value = 'lgp';
+    // Act — change fuel type to LPG (none in Lisbon within 10 km)
+    mockFuelType.value = 'lpg';
 
     // Assert
-    expect(visibleStations.value.length).toBe(0);
+    expect(stations.value.length).toBe(0);
 
-    // Act — expand radius to 600 km (Madrid has LGP)
+    // Act — expand radius to 600 km (Madrid has LPG)
     mockRadiusKm.value = 600;
 
     // Assert
-    expect(visibleStations.value.length).toBe(1);
-    expect(visibleStations.value[0].id).toBe(stationRepsolMadridFixture.id);
+    expect(stations.value.length).toBe(1);
+    expect(stations.value[0].id).toBe(stationRepsolMadridFixture.id);
   });
 
   it('should reset custom origin when resetStationsState is called', () => {
-    // Assemble
-    const { setOriginLocation, originLocation } = useStations();
-    setOriginLocation({ latitude: 40.0, longitude: -3.0 });
-    expect(originLocation.value).toEqual({ latitude: 40.0, longitude: -3.0 });
+    // Assemble — set origin to Madrid and look for gasoline98 within 50 km (only in Madrid)
+    const { stations, setOriginLocation } = useStations();
+    mockFuelType.value = 'gasoline98';
+    mockRadiusKm.value = 50;
+    setOriginLocation({ latitude: 40.4200, longitude: -3.7050 });
+    expect(stations.value.length).toBe(1);
 
-    // Act
+    // Act — reset custom origin back to default geolocation (Lisbon)
     resetStationsState();
 
-    // Assert — falls back to mockCoords
-    expect(originLocation.value).toEqual(mockCoords.value);
+    // Assert — Repsol Madrid is now ~500 km away, so no gasoline98 within 50 km of Lisbon
+    expect(stations.value.length).toBe(0);
   });
 
   it('should forward API state and fetchStations from useIberianFuel', () => {

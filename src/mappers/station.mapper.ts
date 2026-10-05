@@ -6,7 +6,7 @@ function mapIfcStationFuelsToFuelPrices(ifcStationFuels: Fuel[]): FuelPrices {
     gasoline95: null,
     gasoline98: null,
     diesel: null,
-    lgp: null,
+    lpg: null,
   };
 
   for (const ifcStationFuel of ifcStationFuels) {
@@ -17,7 +17,7 @@ function mapIfcStationFuelsToFuelPrices(ifcStationFuels: Fuel[]): FuelPrices {
     } else if (ifcStationFuel.name === IFC_FUEL_NAME.DIESEL) {
       prices.diesel = ifcStationFuel.price;
     } else if (ifcStationFuel.name === IFC_FUEL_NAME.LPG) {
-      prices.lgp = ifcStationFuel.price;
+      prices.lpg = ifcStationFuel.price;
     }
   }
 

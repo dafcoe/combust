@@ -1,5 +1,4 @@
 import { resetState, useGeolocation } from '../useGeolocation.ts';
-import { madridCoordsFixture } from './useGeolocation.fixture.ts';
 import {
   mockGeolocationDenied,
   mockGeolocationSuccess,
@@ -8,6 +7,7 @@ import {
   PERMISSION_DENIED,
 } from './useGeolocation.spec-utils.ts';
 import { DEFAULT_COORDS } from '@/constants';
+import { madridCoordsFixture } from '@/fixtures';
 
 describe('useGeolocation', () => {
   beforeEach(() => {

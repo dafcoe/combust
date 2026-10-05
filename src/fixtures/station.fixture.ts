@@ -95,11 +95,6 @@ export const ifcStationsFixture: IfcStation[] = [
   ifcStationRepsolMadridFixture,
 ];
 
-export const ifcStationsWithBpFixture: IfcStation[] = [
-  ifcStationBpLisboaFixture,
-  ifcStationGalpLisboaFixture,
-];
-
 export const stationGalpLisboaFixture: Station = {
   id: 'PT-1234',
   name: 'Galp Lisboa Centro',
@@ -120,7 +115,7 @@ export const stationGalpLisboaFixture: Station = {
     diesel: 1.619,
     gasoline95: 1.759,
     gasoline98: null,
-    lgp: null,
+    lpg: null,
   },
 };
 
@@ -144,11 +139,30 @@ export const stationRepsolMadridFixture: Station = {
     diesel: null,
     gasoline95: null,
     gasoline98: 1.899,
-    lgp: 0.989,
+    lpg: 0.989,
   },
 };
 
-export const stationsFixture: Station[] = [
-  stationGalpLisboaFixture,
-  stationRepsolMadridFixture,
-];
+export const stationBpLisboaFixture: Station = {
+  id: 'PT-9999',
+  name: 'BP Lisboa Rossio',
+  brand: 'BP',
+  address: {
+    country: 'Portugal',
+    district: 'Lisboa',
+    municipality: 'Lisboa',
+    postalCode: '1100-200',
+    street: 'Praça Rossio 5',
+    town: 'Lisboa',
+  },
+  location: {
+    latitude: 38.7139,
+    longitude: -9.1394,
+  },
+  prices: {
+    diesel: 1.649,
+    gasoline95: 1.829,
+    gasoline98: null,
+    lpg: null,
+  },
+};

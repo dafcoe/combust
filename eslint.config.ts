@@ -29,6 +29,7 @@ export default tseslint.config(
     rules: {
       // eslint
       'no-empty': ['error', { allowEmptyCatch: true }],
+      'no-undef': 'off',
       // stylistic
       '@stylistic/indent': ['error', 2],
       '@stylistic/quotes': ['error', 'single'],

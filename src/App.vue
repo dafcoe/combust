@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue';
+import { InteractiveMap } from '@/components';
 </script>
 
 <template>
-  <HelloWorld />
+  <main class="w-screen h-screen overflow-hidden">
+    <InteractiveMap />
+  </main>
 </template>

@@ -124,6 +124,24 @@ describe('InteractiveMap', () => {
     ]);
   });
 
+  it('should emit selectStation when a station marker is clicked', async () => {
+    const wrapper = mount(InteractiveMap, {
+      props: {
+        stations: [stationGalpLisboaFixture],
+      },
+    });
+
+    const lastMarkerCall = vi.mocked(Marker).mock.calls.at(-1);
+    const markerElement = lastMarkerCall?.[0]?.element as HTMLElement;
+    const markerButton = markerElement.querySelector('[data-testid="station-marker"]') as HTMLElement;
+
+    markerButton?.click();
+    await nextTick();
+
+    expect(wrapper.emitted('selectStation')).toBeTruthy();
+    expect(wrapper.emitted('selectStation')?.[0]).toEqual([stationGalpLisboaFixture]);
+  });
+
   it('should update marker position when geolocation coordinates change', async () => {
     mount(InteractiveMap);
 

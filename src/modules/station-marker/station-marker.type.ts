@@ -1,3 +1,4 @@
+import type { Marker } from 'maplibre-gl';
 import type { FuelType, Station } from '@/types';
 
 export type StationMarkerProps = {
@@ -17,4 +18,10 @@ export type StationMarkerFuelBadgeStyle = {
   badgeBorder: string;
   chipBg: string;
   chipText: string;
+};
+
+export type StationMarkerInstance = {
+  stationId: string;
+  element: HTMLDivElement;
+  marker: Marker;
 };

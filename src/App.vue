@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { InteractiveMap } from '@/components';
+import { InteractiveMap } from '@/modules/interactive-map';
 </script>
 
 <template>

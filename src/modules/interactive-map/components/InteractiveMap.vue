@@ -7,30 +7,37 @@ import {
   type MapOptions,
   type MarkerOptions,
 } from 'maplibre-gl';
-import { createVNode, onMounted, onUnmounted, ref, render, useTemplateRef, watch } from 'vue';
-import type { InteractiveMapEmits, InteractiveMapProps, MountedStationMarker } from './interactive-map.type';
-import StationMarker from '@/components/station-marker/StationMarker.vue';
+import { onMounted, onUnmounted, shallowRef, toRef, useTemplateRef, watch } from 'vue';
+import type { InteractiveMapEmits, InteractiveMapProps } from '../interactive-map.type.ts';
 import { useGeolocation, useTheme } from '@/composables';
 import { DEFAULT_MAP_ZOOM, MAP_STYLE_DARK, MAP_STYLE_LIGHT } from '@/constants';
 import { dummyStationFixture } from '@/fixtures';
+import { useStationMarkers } from '@/modules/station-marker/composables/useStationMarkers.ts';
 import type { GeolocationCoordinates, Station } from '@/types';
 
 const props = withDefaults(defineProps<InteractiveMapProps>(), {
   stations: () => [dummyStationFixture],
 });
 
-const emit = defineEmits<InteractiveMapEmits>();
+const emits = defineEmits<InteractiveMapEmits>();
 
 const mapContainer = useTemplateRef('map-container');
-let map: Map | null = null;
+const map = shallowRef<Map | null>(null);
 
 let userMarker: Marker | null = null;
-let stationMarkers: MountedStationMarker[] = [];
-
-const selectedStationId = ref<string | null>(null);
 
 const { coords } = useGeolocation();
 const { isDarkTheme } = useTheme();
+
+const {
+  initMarkers: initStationMarkers,
+  removeMarkers: removeStationMarkers,
+} = useStationMarkers(
+  map,
+  toRef(props, 'stations'),
+  toRef(props, 'selectedFuelType'),
+  (station: Station) => emits('selectStation', station),
+);
 
 // =======================
 // MAP
@@ -46,28 +53,28 @@ function createMap(): void {
     attributionControl: false,
   };
 
-  map = new Map(mapOptions);
+  map.value = new Map(mapOptions);
 }
 
 function addControlsToMap(): void {
-  map?.addControl(
+  map.value?.addControl(
     new AttributionControl({ compact: true }),
     'bottom-left',
   );
 
-  map?.addControl(
+  map.value?.addControl(
     new NavigationControl({ showCompass: true, showZoom: true }),
     'bottom-right',
   );
 }
 
 function registerMapEventListeners(): void {
-  map?.on(
+  map.value?.on(
     'load',
-    () => { map?.resize(); },
+    () => { map.value?.resize(); },
   );
 
-  map?.on(
+  map.value?.on(
     'error',
     (event) => { console.error('[MapLibre error]', event); },
   );
@@ -80,10 +87,10 @@ function initMap(): void {
 }
 
 function removeMap(): void {
-  if (!map) return;
+  if (!map.value) return;
 
-  map.remove();
-  map = null;
+  map.value.remove();
+  map.value = null;
 }
 
 // =======================
@@ -116,9 +123,9 @@ function createUserMarker(): void {
 }
 
 function addUserMarkerToMap(): void {
-  if (!map) return;
+  if (!map.value) return;
 
-  userMarker?.addTo(map);
+  userMarker?.addTo(map.value);
 }
 
 function initUserMarker(): void {
@@ -140,79 +147,6 @@ function removeUserMarker(): void {
 }
 
 // =======================
-// STATION MARKERS
-// =======================
-
-function createStationMakerElement(station: Station): HTMLDivElement {
-  const markerEl = document.createElement('div');
-
-  const markerVNode = createVNode(StationMarker, {
-    station,
-    selectedFuelType: props.selectedFuelType,
-    isSelected: selectedStationId.value === station.id,
-    onSelect: (selectedStation: Station) => {
-      selectedStationId.value = selectedStation.id;
-      emit('selectStation', selectedStation);
-    },
-  });
-
-  render(markerVNode, markerEl);
-
-  return markerEl;
-}
-
-function createStationMarker(station: Station): void {
-  const { latitude, longitude } = station.location;
-  const markerEl = createStationMakerElement(station);
-  const markerOptions: MarkerOptions = {
-    element: markerEl,
-    anchor: 'bottom',
-  };
-
-  stationMarkers.push({
-    stationId: station.id,
-    element: markerEl,
-    marker: new Marker(markerOptions).setLngLat([longitude, latitude]),
-  });
-}
-
-function createStationMarkers(): void {
-  if ((props.stations || []).length === 0) return;
-
-  props.stations.forEach(createStationMarker);
-}
-
-function addStationMarkerToMap({ marker }: MountedStationMarker): void {
-  if (!map) return;
-
-  marker.addTo(map);
-}
-
-function addStationMarkersToMap(): void {
-  stationMarkers.forEach(addStationMarkerToMap);
-}
-
-function initStationMarkers(): void {
-  createStationMarkers();
-  addStationMarkersToMap();
-}
-
-function updateStationMarkers(): void {
-  removeStationMarkers();
-  initStationMarkers();
-}
-
-function removeStationMarker({ element, marker }: MountedStationMarker): void {
-  render(null, element);
-  marker.remove();
-}
-
-function removeStationMarkers(): void {
-  stationMarkers.forEach(removeStationMarker);
-  stationMarkers = [];
-}
-
-// =======================
 // OTHER
 // =======================
 
@@ -229,9 +163,9 @@ function removeInteractiveMap(): void {
 }
 
 function updateMapTheme(isDark: boolean): void {
-  if (!map) return;
+  if (!map.value) return;
 
-  map.setStyle(isDark ? MAP_STYLE_DARK : MAP_STYLE_LIGHT);
+  map.value.setStyle(isDark ? MAP_STYLE_DARK : MAP_STYLE_LIGHT);
 }
 
 watch(
@@ -243,22 +177,6 @@ watch(
 watch(
   isDarkTheme,
   updateMapTheme,
-);
-
-watch(
-  () => props.stations,
-  updateStationMarkers,
-  { deep: true },
-);
-
-watch(
-  () => props.selectedFuelType,
-  updateStationMarkers,
-);
-
-watch(
-  selectedStationId,
-  updateStationMarkers,
 );
 
 onMounted(initInteractiveMap);

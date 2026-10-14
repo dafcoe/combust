@@ -166,3 +166,30 @@ export const stationBpLisboaFixture: Station = {
     lpg: null,
   },
 };
+
+export const dummyStationFixture: Station = {
+  id: 'PT-DEMO-1',
+  name: 'Galp Marquês de Pombal',
+  brand: 'GALP',
+  address: {
+    country: 'Portugal',
+    district: 'Lisboa',
+    municipality: 'Lisboa',
+    postalCode: '1250-096',
+    street: 'Praça Marquês de Pombal',
+    town: 'Lisboa',
+  },
+  location: {
+    latitude: 38.7255,
+    longitude: -9.15,
+  },
+  prices: {
+    diesel: 1.619,
+    gasoline95: 1.759,
+    gasoline98: 1.899,
+    lpg: 0.949,
+  },
+  distanceKm: 0.8,
+  isOpen: true,
+};
+

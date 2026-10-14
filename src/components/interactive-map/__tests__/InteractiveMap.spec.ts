@@ -3,6 +3,7 @@ import { AttributionControl, Map, Marker, NavigationControl } from 'maplibre-gl'
 import { nextTick, ref } from 'vue';
 import InteractiveMap from '../InteractiveMap.vue';
 import { DEFAULT_COORDS, DEFAULT_MAP_ZOOM, MAP_STYLE_DARK, MAP_STYLE_LIGHT } from '@/constants';
+import { dummyStationFixture, stationGalpLisboaFixture } from '@/fixtures';
 import type { GeolocationCoordinates } from '@/types';
 
 const mockCoords = ref<GeolocationCoordinates>({ latitude: 38.7223, longitude: -9.1393 });
@@ -44,9 +45,9 @@ const mockMarkerInstance = {
 vi.mock('maplibre-gl', () => {
   return {
     Map: vi.fn(function () { return mockMapInstance; }),
-    Marker: vi.fn(function () { return mockMarkerInstance }),
-    NavigationControl: vi.fn(function () { return {} }),
-    AttributionControl: vi.fn(function () { return {} }),
+    Marker: vi.fn(function () { return mockMarkerInstance; }),
+    NavigationControl: vi.fn(function () { return {}; }),
+    AttributionControl: vi.fn(function () { return {}; }),
   };
 });
 
@@ -80,11 +81,47 @@ describe('InteractiveMap', () => {
   });
 
   it('should initialize and attach the user location marker at user coordinates', () => {
-    mount(InteractiveMap);
+    mount(InteractiveMap, {
+      props: {
+        stations: [],
+      },
+    });
 
     expect(Marker).toHaveBeenCalledTimes(1);
     expect(mockSetLngLat).toHaveBeenCalledWith([-9.1393, 38.7223]);
     expect(mockAddTo).toHaveBeenCalled();
+  });
+
+  it('should initialize and attach station markers with bottom anchor', () => {
+    mount(InteractiveMap);
+
+    expect(Marker).toHaveBeenCalledWith(
+      expect.objectContaining({ anchor: 'bottom' }),
+    );
+    expect(mockSetLngLat).toHaveBeenCalledWith([
+      dummyStationFixture.location.longitude,
+      dummyStationFixture.location.latitude,
+    ]);
+  });
+
+  it('should update station markers when stations prop changes', async () => {
+    const wrapper = mount(InteractiveMap, {
+      props: {
+        stations: [],
+      },
+    });
+
+    expect(Marker).toHaveBeenCalledTimes(1);
+
+    await wrapper.setProps({
+      stations: [stationGalpLisboaFixture],
+    });
+
+    expect(Marker).toHaveBeenCalledTimes(2);
+    expect(mockSetLngLat).toHaveBeenCalledWith([
+      stationGalpLisboaFixture.location.longitude,
+      stationGalpLisboaFixture.location.latitude,
+    ]);
   });
 
   it('should update marker position when geolocation coordinates change', async () => {
@@ -126,12 +163,13 @@ describe('InteractiveMap', () => {
     expect(mockResize).toHaveBeenCalledTimes(1);
   });
 
-  it('should clean up map and marker on unmount', () => {
+  it('should clean up map and markers on unmount', () => {
     const wrapper = mount(InteractiveMap);
 
     wrapper.unmount();
 
-    expect(mockMarkerRemove).toHaveBeenCalledTimes(1);
+    // 1 user location marker + 1 dummy station marker
+    expect(mockMarkerRemove).toHaveBeenCalledTimes(2);
     expect(mockMapRemove).toHaveBeenCalledTimes(1);
   });
 });

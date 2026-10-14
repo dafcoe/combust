@@ -7,18 +7,34 @@ import {
   type MapOptions,
   type MarkerOptions,
 } from 'maplibre-gl';
-import { onMounted, onUnmounted, useTemplateRef, watch } from 'vue';
+import { createVNode, onMounted, onUnmounted, ref, render, useTemplateRef, watch } from 'vue';
+import type { InteractiveMapEmits, InteractiveMapProps, MountedStationMarker } from './interactive-map.type';
+import StationMarker from '@/components/station-marker/StationMarker.vue';
 import { useGeolocation, useTheme } from '@/composables';
 import { DEFAULT_MAP_ZOOM, MAP_STYLE_DARK, MAP_STYLE_LIGHT } from '@/constants';
-import type { GeolocationCoordinates } from '@/types';
+import { dummyStationFixture } from '@/fixtures';
+import type { GeolocationCoordinates, Station } from '@/types';
+
+const props = withDefaults(defineProps<InteractiveMapProps>(), {
+  stations: () => [dummyStationFixture],
+});
+
+const emit = defineEmits<InteractiveMapEmits>();
 
 const mapContainer = useTemplateRef('map-container');
 let map: Map | null = null;
-let userLocationMarker: Marker | null = null;
+
+let userMarker: Marker | null = null;
+let stationMarkers: MountedStationMarker[] = [];
+
+const selectedStationId = ref<string | null>(null);
 
 const { coords } = useGeolocation();
 const { isDarkTheme } = useTheme();
 
+// =======================
+// MAP
+// =======================
 function createMap(): void {
   if (!mapContainer.value) return;
 
@@ -57,6 +73,23 @@ function registerMapEventListeners(): void {
   );
 }
 
+function initMap(): void {
+  createMap();
+  addControlsToMap();
+  registerMapEventListeners();
+}
+
+function removeMap(): void {
+  if (!map) return;
+
+  map.remove();
+  map = null;
+}
+
+// =======================
+// USER MARKER
+// =======================
+
 function createUserMarkerElement(): HTMLDivElement {
   const markerEl = document.createElement('div');
   const pulseEl = document.createElement('span');
@@ -72,57 +105,127 @@ function createUserMarkerElement(): HTMLDivElement {
   return markerEl;
 }
 
-function createUserLocationMarker(): void {
+function createUserMarker(): void {
   const { latitude, longitude } = coords.value;
   const markerOptions: MarkerOptions = {
     element: createUserMarkerElement(),
     anchor: 'center',
   };
 
-  userLocationMarker = new Marker(markerOptions).setLngLat([longitude, latitude]);
+  userMarker = new Marker(markerOptions).setLngLat([longitude, latitude]);
 }
 
-function addUserLocationMarkerToMap(): void {
+function addUserMarkerToMap(): void {
   if (!map) return;
 
-  userLocationMarker?.addTo(map);
+  userMarker?.addTo(map);
 }
 
-function initUserLocationMarker(): void {
-  createUserLocationMarker();
-  addUserLocationMarkerToMap();
+function initUserMarker(): void {
+  createUserMarker();
+  addUserMarkerToMap();
 }
 
-function initMap(): void {
-  createMap();
-  addControlsToMap();
-  registerMapEventListeners();
-  initUserLocationMarker();
+function updateUserMarker({ longitude, latitude }: GeolocationCoordinates): void {
+  if (!userMarker) return;
+
+  userMarker.setLngLat([longitude, latitude]);
 }
 
-function removeUserLocationMarker(): void {
-  if (!userLocationMarker) return;
+function removeUserMarker(): void {
+  if (!userMarker) return;
 
-  userLocationMarker.remove();
-  userLocationMarker = null;
+  userMarker.remove();
+  userMarker = null;
 }
 
-function removeMap(): void {
+// =======================
+// STATION MARKERS
+// =======================
+
+function createStationMakerElement(station: Station): HTMLDivElement {
+  const markerEl = document.createElement('div');
+
+  const markerVNode = createVNode(StationMarker, {
+    station,
+    selectedFuelType: props.selectedFuelType,
+    isSelected: selectedStationId.value === station.id,
+    onSelect: (selectedStation: Station) => {
+      selectedStationId.value = selectedStation.id;
+      emit('selectStation', selectedStation);
+    },
+  });
+
+  render(markerVNode, markerEl);
+
+  return markerEl;
+}
+
+function createStationMarker(station: Station): void {
+  const { latitude, longitude } = station.location;
+  const markerEl = createStationMakerElement(station);
+  const markerOptions: MarkerOptions = {
+    element: markerEl,
+    anchor: 'bottom',
+  };
+
+  stationMarkers.push({
+    stationId: station.id,
+    element: markerEl,
+    marker: new Marker(markerOptions).setLngLat([longitude, latitude]),
+  });
+}
+
+function createStationMarkers(): void {
+  if ((props.stations || []).length === 0) return;
+
+  props.stations.forEach(createStationMarker);
+}
+
+function addStationMarkerToMap({ marker }: MountedStationMarker): void {
   if (!map) return;
 
-  map.remove();
-  map = null;
+  marker.addTo(map);
 }
 
-function destroyMap(): void {
-  removeUserLocationMarker();
+function addStationMarkersToMap(): void {
+  stationMarkers.forEach(addStationMarkerToMap);
+}
+
+function initStationMarkers(): void {
+  createStationMarkers();
+  addStationMarkersToMap();
+}
+
+function updateStationMarkers(): void {
+  removeStationMarkers();
+  initStationMarkers();
+}
+
+function removeStationMarker({ element, marker }: MountedStationMarker): void {
+  render(null, element);
+  marker.remove();
+}
+
+function removeStationMarkers(): void {
+  stationMarkers.forEach(removeStationMarker);
+  stationMarkers = [];
+}
+
+// =======================
+// OTHER
+// =======================
+
+function initInteractiveMap(): void {
+  initMap();
+  initUserMarker();
+  initStationMarkers();
+}
+
+function removeInteractiveMap(): void {
+  removeStationMarkers();
+  removeUserMarker();
   removeMap();
-}
-
-function updateUserLocation({ longitude, latitude }: GeolocationCoordinates): void {
-  if (!userLocationMarker) return;
-
-  userLocationMarker.setLngLat([longitude, latitude]);
 }
 
 function updateMapTheme(isDark: boolean): void {
@@ -133,7 +236,7 @@ function updateMapTheme(isDark: boolean): void {
 
 watch(
   () => coords.value,
-  updateUserLocation,
+  updateUserMarker,
   { deep: true },
 );
 
@@ -142,8 +245,24 @@ watch(
   updateMapTheme,
 );
 
-onMounted(initMap);
-onUnmounted(destroyMap);
+watch(
+  () => props.stations,
+  updateStationMarkers,
+  { deep: true },
+);
+
+watch(
+  () => props.selectedFuelType,
+  updateStationMarkers,
+);
+
+watch(
+  selectedStationId,
+  updateStationMarkers,
+);
+
+onMounted(initInteractiveMap);
+onUnmounted(removeInteractiveMap);
 </script>
 
 <template>

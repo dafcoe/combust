@@ -13,7 +13,7 @@ export function useStationMarkers(
   const selectedStationId = ref<string | null>(null);
   let markers: StationMarkerInstance[] = [];
 
-  function createMakerElement(station: Station): HTMLDivElement {
+  function createMarkerElement(station: Station): HTMLDivElement {
     const markerEl = document.createElement('div');
     const onSelect = (selectedStation: Station) => {
       selectedStationId.value = selectedStation.id;
@@ -34,7 +34,7 @@ export function useStationMarkers(
 
   function createMarker(station: Station): void {
     const { latitude, longitude } = station.location;
-    const markerEl = createMakerElement(station);
+    const markerEl = createMarkerElement(station);
     const markerOptions: MarkerOptions = {
       element: markerEl,
       anchor: 'bottom',

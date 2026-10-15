@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { StationMarkerEmits, StationMarkerFuelBadgeStyle, StationMarkerProps } from '../station-marker.type.ts';
-import { FUEL_TYPE_SHORT_LABELS, FUEL_TYPES } from '@/constants';
-import type { FuelType } from '@/types';
+import { FUEL_TYPE_SHORT_LABELS, FUEL_TYPES, type FuelType } from '@/modules/fuel';
 
 const props = withDefaults(defineProps<StationMarkerProps>(), {
   selectedFuelType: null,

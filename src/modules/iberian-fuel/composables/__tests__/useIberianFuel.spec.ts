@@ -1,16 +1,13 @@
+import { IberianFuelClient } from '@dafcoe/iberian-fuel-client';
 import {
   resetIberianFuelState,
   useIberianFuel,
 } from '../useIberianFuel.ts';
-import {
-  ifcStationsFixture,
-  stationGalpLisboaFixture,
-  stationRepsolMadridFixture,
-} from '@/fixtures';
-import { IberianFuelClient, type Station } from '@/types';
+import { ifcStationsFixture } from '@/modules/iberian-fuel';
+import { type Station, stationGalpLisboaFixture, stationRepsolMadridFixture } from '@/modules/station';
 
-vi.mock('@/types', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/types')>();
+vi.mock('@dafcoe/iberian-fuel-client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@dafcoe/iberian-fuel-client')>();
 
   return {
     ...actual,
@@ -42,7 +39,7 @@ describe('useIberianFuel', () => {
     expect(lastFetchedAt.value).toBeNull();
   });
 
-  it('should fetch and map stations successfully', async () => {
+  it('should fetch stations successfully', async () => {
     // Assemble
     MockedIberianFuelClient.prototype.getStations = vi.fn().mockResolvedValue(ifcStationsFixture);
     const { stations, isLoading, error, lastFetchedAt, fetchStations } = useIberianFuel();
@@ -55,7 +52,7 @@ describe('useIberianFuel', () => {
     // Assert
     expect(isLoading.value).toBe(false);
     expect(error.value).toBeNull();
-    expect(stations.value).toEqual(stationsFixture);
+    expect(stations.value).toEqual(ifcStationsFixture); // <-- comparar com ifcStationsFixture
     expect(lastFetchedAt.value).toBeInstanceOf(Date);
   });
 

@@ -2,7 +2,8 @@ import { Map, Marker, type MarkerOptions } from 'maplibre-gl';
 import { createVNode, type Ref, ref, render, watch } from 'vue';
 import StationMarker from '../components/StationMarker.vue';
 import type { StationMarkerInstance } from '../station-marker.type.ts';
-import type { FuelType, Station } from '@/types';
+import type { FuelType } from '@/modules/fuel';
+import type { Station } from '@/modules/station';
 
 export function useStationMarkers(
   map: Ref<Map | null>,

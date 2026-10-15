@@ -1,7 +1,10 @@
 import type { Fuel } from '@dafcoe/iberian-fuel-client';
-import { type FuelPrices, IFC_FUEL_NAME, type IfcStation, type Station } from '@/types';
+import type { DeepReadonly } from 'vue';
+import type { Station } from '../station.type.ts';
+import type { FuelPrices } from '@/modules/fuel';
+import { IFC_FUEL_NAME, type IfcStation } from '@/modules/iberian-fuel';
 
-function mapIfcStationFuelsToFuelPrices(ifcStationFuels: Fuel[]): FuelPrices {
+function mapIfcStationFuelsToFuelPrices(ifcStationFuels: readonly Fuel[] | DeepReadonly<Fuel[]>): FuelPrices {
   const prices: FuelPrices = {
     gasoline95: null,
     gasoline98: null,
@@ -24,7 +27,7 @@ function mapIfcStationFuelsToFuelPrices(ifcStationFuels: Fuel[]): FuelPrices {
   return prices;
 }
 
-function mapIfcStationToStation(ifcStation: IfcStation): Station {
+function mapIfcStationToStation(ifcStation: IfcStation | DeepReadonly<IfcStation>): Station {
   return {
     id: ifcStation.id,
     name: ifcStation.name,
@@ -45,6 +48,6 @@ function mapIfcStationToStation(ifcStation: IfcStation): Station {
   };
 }
 
-export function mapIfcStationsToStations(ifcStations: IfcStation[]): Station[] {
+export function mapIfcStationsToStations(ifcStations: DeepReadonly<IfcStation[]>): Station[] {
   return ifcStations.map(mapIfcStationToStation);
 }

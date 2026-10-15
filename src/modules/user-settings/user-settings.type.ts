@@ -1,5 +1,7 @@
+import type { FuelType } from '@/modules/fuel';
 import type { ThemeMode } from '@/modules/theme';
-import type { FuelType, SortMode } from '@/types';
+
+export type SortMode = 'price' | 'distance';
 
 export type UserSettings = {
   theme: ThemeMode;

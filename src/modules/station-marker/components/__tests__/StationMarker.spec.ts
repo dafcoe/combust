@@ -1,7 +1,6 @@
 import { mount } from '@vue/test-utils';
 import StationMarker from '../StationMarker.vue';
-import { stationGalpLisboaFixture, stationRepsolMadridFixture } from '@/fixtures';
-import type { Station } from '@/types';
+import { type Station, stationGalpLisboaFixture, stationRepsolMadridFixture } from '@/modules/station';
 
 describe('StationMarker', () => {
   const baseStation: Station = {

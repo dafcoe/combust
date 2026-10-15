@@ -1,10 +1,10 @@
+import { IberianFuelClient } from '@dafcoe/iberian-fuel-client';
 import { readonly, ref } from 'vue';
-import { mapIfcStationsToStations } from '@/mappers';
-import { IberianFuelClient, type Station } from '@/types';
+import { type IfcStation } from '@/modules/iberian-fuel';
 
 const ifcClient = new IberianFuelClient();
 
-const stations = ref<Station[]>([]);
+const stations = ref<IfcStation[]>([]);
 const isLoading = ref<boolean>(false);
 const error = ref<string | null>(null);
 const lastFetchedAt = ref<Date | null>(null);
@@ -16,9 +16,8 @@ async function fetchStations(): Promise<void> {
   error.value = null;
 
   try {
-    const ifcStations = await ifcClient.getStations();
+    stations.value = await ifcClient.getStations();
 
-    stations.value = mapIfcStationsToStations(ifcStations);
     lastFetchedAt.value = new Date();
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to fetch iberian fuel client stations';

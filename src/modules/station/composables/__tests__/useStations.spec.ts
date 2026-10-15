@@ -1,14 +1,21 @@
 import {
-  resetStationsState,
-  useStations,
-} from '../useStations.ts';
-import {
   stationBpLisboaFixture,
   stationGalpLisboaFixture,
   stationRepsolMadridFixture,
-} from '@/fixtures';
+} from '../../fixtures/station.fixture.ts';
+import {
+  resetStationsState,
+  useStations,
+} from '../useStations.ts';
+import type { FuelType } from '@/modules/fuel';
 import type { GeolocationCoordinates } from '@/modules/geolocation';
-import type { FuelType, SortMode, Station } from '@/types';
+import {
+  type IfcStation,
+  ifcStationBpLisboaFixture,
+  ifcStationGalpLisboaFixture,
+  ifcStationRepsolMadridFixture,
+} from '@/modules/iberian-fuel';
+import type { SortMode } from '@/modules/user-settings';
 
 const {
   mockCoords,
@@ -25,7 +32,7 @@ const {
 
   return {
     mockCoords: vueRef<GeolocationCoordinates>({ latitude: 38.7223, longitude: -9.1393 }),
-    mockRawStations: vueRef<Station[]>([]),
+    mockRawStations: vueRef<IfcStation[]>([]),
     mockFuelType: vueRef<FuelType>('gasoline95'),
     mockRadiusKm: vueRef<number>(10),
     mockSortBy: vueRef<SortMode>('price'),
@@ -47,15 +54,20 @@ vi.mock('@/modules/geolocation', async (importOriginal) => {
   };
 });
 
-vi.mock('@/composables/use-iberian-fuel/useIberianFuel', () => ({
-  useIberianFuel: () => ({
-    stations: mockRawStations,
-    isLoading: mockIsLoading,
-    error: mockError,
-    lastFetchedAt: mockLastFetchedAt,
-    fetchStations: mockFetchStations,
-  }),
-}));
+vi.mock('@/modules/iberian-fuel', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/modules/iberian-fuel')>();
+
+  return {
+    ...actual,
+    useIberianFuel: () => ({
+      stations: mockRawStations,
+      isLoading: mockIsLoading,
+      error: mockError,
+      lastFetchedAt: mockLastFetchedAt,
+      fetchStations: mockFetchStations,
+    }),
+  };
+});
 
 vi.mock('@/modules/user-settings', () => ({
   useUserSettings: () => ({
@@ -65,10 +77,10 @@ vi.mock('@/modules/user-settings', () => ({
   }),
 }));
 
-export const stationsFixture: Station[] = [
-  stationGalpLisboaFixture,
-  stationBpLisboaFixture,
-  stationRepsolMadridFixture,
+export const ifcStationsFixture: IfcStation[] = [
+  ifcStationGalpLisboaFixture,
+  ifcStationBpLisboaFixture,
+  ifcStationRepsolMadridFixture,
 ];
 
 describe('useStations', () => {
@@ -76,7 +88,7 @@ describe('useStations', () => {
     vi.clearAllMocks();
     resetStationsState();
     mockCoords.value = { latitude: 38.7223, longitude: -9.1393 };
-    mockRawStations.value = [...stationsFixture];
+    mockRawStations.value = [...ifcStationsFixture];
     mockFuelType.value = 'gasoline95';
     mockRadiusKm.value = 10;
     mockSortBy.value = 'price';

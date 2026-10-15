@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils';
 import { Map, Marker } from 'maplibre-gl';
 import { nextTick } from 'vue';
 import InteractiveMap from '../InteractiveMap.vue';
-import { stationGalpLisboaFixture } from '@/fixtures';
+import { stationGalpLisboaFixture } from '@/modules/station';
 
 const mockAddControl = vi.fn();
 const mockSetStyle = vi.fn();

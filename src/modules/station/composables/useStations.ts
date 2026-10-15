@@ -1,29 +1,33 @@
 import { computed, ref } from 'vue';
-import { useIberianFuel } from '@/composables/use-iberian-fuel/useIberianFuel';
+import { mapIfcStationsToStations } from '../mappers/station.mapper';
+import type { Station } from '../station.type';
+import type { FuelType } from '@/modules/fuel';
 import { haversineDistanceKm, useGeolocation } from '@/modules/geolocation';
 import type { GeolocationCoordinates } from '@/modules/geolocation';
-import { useUserSettings } from '@/modules/user-settings';
-import type { FuelType, SortMode, Station } from '@/types';
+import { useIberianFuel } from '@/modules/iberian-fuel';
+import { type SortMode, useUserSettings } from '@/modules/user-settings';
 
 const originCoords = ref<GeolocationCoordinates | null>(null);
 
 const { coords: geolocationCoords } = useGeolocation();
-const { stations: allStations, isLoading, error, lastFetchedAt, fetchStations } = useIberianFuel();
+const { stations: ifcStations, isLoading, error, lastFetchedAt, fetchStations } = useIberianFuel();
 const { fuelType, radiusKm, sortBy } = useUserSettings();
 
 const computedOriginCoords = computed<GeolocationCoordinates>(() => originCoords.value ?? geolocationCoords.value);
 
-const stationsWithDistance = computed<Station[]>(() => {
-  return allStations.value.map((station) => ({
+const stations = computed<Station[]>(() => {
+  const mappedStations = mapIfcStationsToStations(ifcStations.value);
+  const stationsWithDistance = hydrateStationsDistance(mappedStations);
+  const filtered = filterStations(stationsWithDistance, fuelType.value, radiusKm.value);
+  return sortStations(filtered, fuelType.value, sortBy.value);
+});
+
+function hydrateStationsDistance(stationsWithoutDistance: Station[]): Station[] {
+  return stationsWithoutDistance.map((station) => ({
     ...station,
     distanceKm: haversineDistanceKm(computedOriginCoords.value, station.location),
   }));
-});
-
-const stations = computed<Station[]>(() => {
-  const filtered = filterStations(stationsWithDistance.value, fuelType.value, radiusKm.value);
-  return sortStations(filtered, fuelType.value, sortBy.value);
-});
+}
 
 function filterStations(
   stationsToFilter: Station[],

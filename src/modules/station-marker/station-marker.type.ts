@@ -1,5 +1,6 @@
 import type { Marker } from 'maplibre-gl';
-import type { FuelType, Station } from '@/types';
+import type { FuelType } from '@/modules/fuel';
+import type { Station } from '@/modules/station';
 
 export type StationMarkerProps = {
   station: Station;

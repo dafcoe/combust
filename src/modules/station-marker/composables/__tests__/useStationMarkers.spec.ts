@@ -2,8 +2,8 @@ import type { Map, MarkerOptions } from 'maplibre-gl';
 import { Marker } from 'maplibre-gl';
 import { nextTick, ref, shallowRef } from 'vue';
 import { useStationMarkers } from '../useStationMarkers';
-import { stationGalpLisboaFixture, stationRepsolMadridFixture } from '@/fixtures';
-import type { FuelType, Station } from '@/types';
+import type { FuelType } from '@/modules/fuel';
+import { type Station, stationGalpLisboaFixture, stationRepsolMadridFixture } from '@/modules/station';
 import { cleanupScope, withScope } from '@/utils';
 
 const mockSetLngLat = vi.fn().mockReturnThis();

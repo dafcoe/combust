@@ -1,9 +1,9 @@
 import { useLocalStorage } from '@vueuse/core';
 import { computed } from 'vue';
-import type { UserSettings } from '../user-settings.type.ts';
+import type { SortMode, UserSettings } from '../user-settings.type.ts';
+import type { FuelType } from '@/modules/fuel';
 import type { ThemeMode } from '@/modules/theme';
 import { DEFAULT_USER_SETTINGS, USER_SETTINGS_STORAGE_KEY } from '@/modules/user-settings/user-settings.constant.ts';
-import type { FuelType, SortMode } from '@/types';
 
 const storageSettings = useLocalStorage<UserSettings>(
   USER_SETTINGS_STORAGE_KEY,

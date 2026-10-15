@@ -1,4 +1,5 @@
-import type { FuelType, Station } from '@/types';
+import type { FuelType } from '@/modules/fuel';
+import type { Station } from '@/modules/station';
 
 export type InteractiveMapProps = {
   stations?: Station[];

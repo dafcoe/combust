@@ -1,6 +1,6 @@
-import type { FuelPrices } from './fuel.type.ts';
-import { IFC_COUNTRY_NAME } from './iberian-fuel-client.type.ts';
+import type { FuelPrices } from '../fuel/fuel.type.ts';
 import type { GeolocationCoordinates } from '@/modules/geolocation';
+import { IFC_COUNTRY_NAME } from '@/modules/iberian-fuel';
 
 export type StationAddress = {
   street: string;

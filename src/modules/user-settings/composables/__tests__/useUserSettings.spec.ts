@@ -1,13 +1,10 @@
 import { nextTick } from 'vue';
+import { DEFAULT_USER_SETTINGS, USER_SETTINGS_STORAGE_KEY } from '../../user-settings.constant.ts';
 import {
   resetUserSettings,
   useUserSettings,
 } from '../useUserSettings.ts';
-import {
-  DEFAULT_USER_SETTINGS,
-  USER_SETTINGS_STORAGE_KEY,
-} from '@/constants';
-import type { UserSettings } from '@/types';
+import type { UserSettings } from '../../user-settings.type.ts';
 
 describe('useUserSettings', () => {
   beforeEach(() => {

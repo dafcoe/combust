@@ -57,7 +57,7 @@ vi.mock('@/composables/use-iberian-fuel/useIberianFuel', () => ({
   }),
 }));
 
-vi.mock('@/composables/use-user-settings/useUserSettings', () => ({
+vi.mock('@/modules/user-settings', () => ({
   useUserSettings: () => ({
     fuelType: mockFuelType,
     radiusKm: mockRadiusKm,

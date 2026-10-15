@@ -1,8 +1,8 @@
 import { computed, ref } from 'vue';
 import { useIberianFuel } from '@/composables/use-iberian-fuel/useIberianFuel';
-import { useUserSettings } from '@/composables/use-user-settings/useUserSettings';
 import { haversineDistanceKm, useGeolocation } from '@/modules/geolocation';
 import type { GeolocationCoordinates } from '@/modules/geolocation';
+import { useUserSettings } from '@/modules/user-settings';
 import type { FuelType, SortMode, Station } from '@/types';
 
 const originCoords = ref<GeolocationCoordinates | null>(null);

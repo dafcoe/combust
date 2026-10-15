@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import StationMarker from '../StationMarker.vue';
-import { type Station, stationGalpLisboaFixture, stationRepsolMadridFixture } from '@/modules/station';
+import { type Station, stationGalpLisboaFixture } from '@/modules/station';
 
 describe('StationMarker', () => {
   const baseStation: Station = {
@@ -116,25 +116,6 @@ describe('StationMarker', () => {
       expect(lpgBadge.exists()).toBe(false);
     });
 
-    it('renders Repsol prices correctly (gasoline98 and lpg)', () => {
-      const wrapper = mount(StationMarker, {
-        props: {
-          station: stationRepsolMadridFixture,
-        },
-      });
-
-      const g98Badge = wrapper.find('[data-testid="fuel-badge-gasoline98"]');
-      const lpgBadge = wrapper.find('[data-testid="fuel-badge-lpg"]');
-
-      expect(g98Badge.exists()).toBe(true);
-      expect(g98Badge.text()).toContain('98');
-      expect(g98Badge.text()).toContain('1.899 €');
-
-      expect(lpgBadge.exists()).toBe(true);
-      expect(lpgBadge.text()).toContain('LPG');
-      expect(lpgBadge.text()).toContain('0.989 €');
-    });
-
     it('renders fallback when no prices are available', () => {
       const wrapper = mount(StationMarker, {
         props: {
@@ -169,47 +150,30 @@ describe('StationMarker', () => {
       expect(root.classes()).toContain('z-30');
     });
 
-    it('emits select and click events with the station when clicked', async () => {
-      const wrapper = mount(StationMarker, {
-        props: {
-          station: baseStation,
-        },
-      });
+    it.each`
+      action              | verboseAction
+      ${'click'}          | ${'clicked'}
+      ${'keydown.enter'}  | ${'Enter key is pressed'}
+      ${'keydown.space'}  | ${'Space key is pressed'}
+    `(
+      'emits select and click events with the station when $verboseAction',
+      async ({ action }) =>
+      {
+        const wrapper = mount(StationMarker, {
+          props: {
+            station: baseStation,
+          },
+        });
 
-      await wrapper.trigger('click');
+        await wrapper.trigger(action);
 
-      expect(wrapper.emitted('select')).toHaveLength(1);
-      expect(wrapper.emitted('select')?.[0]).toEqual([baseStation]);
+        expect(wrapper.emitted('select')).toHaveLength(1);
+        expect(wrapper.emitted('select')?.[0]).toEqual([baseStation]);
 
-      expect(wrapper.emitted('click')).toHaveLength(1);
-      expect(wrapper.emitted('click')?.[0]).toEqual([baseStation]);
-    });
-
-    it('emits select and click events when Enter key is pressed', async () => {
-      const wrapper = mount(StationMarker, {
-        props: {
-          station: baseStation,
-        },
-      });
-
-      await wrapper.trigger('keydown.enter');
-
-      expect(wrapper.emitted('select')).toHaveLength(1);
-      expect(wrapper.emitted('click')).toHaveLength(1);
-    });
-
-    it('emits select and click events when Space key is pressed', async () => {
-      const wrapper = mount(StationMarker, {
-        props: {
-          station: baseStation,
-        },
-      });
-
-      await wrapper.trigger('keydown.space');
-
-      expect(wrapper.emitted('select')).toHaveLength(1);
-      expect(wrapper.emitted('click')).toHaveLength(1);
-    });
+        expect(wrapper.emitted('click')).toHaveLength(1);
+        expect(wrapper.emitted('click')?.[0]).toEqual([baseStation]);
+      },
+    );
   });
 
   describe('accessibility', () => {

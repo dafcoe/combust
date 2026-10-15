@@ -93,5 +93,6 @@ export const ifcStationBpLisboaFixture: IfcStation = {
 
 export const ifcStationsFixture: IfcStation[] = [
   ifcStationGalpLisboaFixture,
+  ifcStationBpLisboaFixture,
   ifcStationRepsolMadridFixture,
 ];

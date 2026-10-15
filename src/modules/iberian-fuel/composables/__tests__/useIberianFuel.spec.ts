@@ -52,7 +52,7 @@ describe('useIberianFuel', () => {
     // Assert
     expect(isLoading.value).toBe(false);
     expect(error.value).toBeNull();
-    expect(stations.value).toEqual(ifcStationsFixture); // <-- comparar com ifcStationsFixture
+    expect(stations.value).toEqual(ifcStationsFixture);
     expect(lastFetchedAt.value).toBeInstanceOf(Date);
   });
 

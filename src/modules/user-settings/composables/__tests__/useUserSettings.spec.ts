@@ -54,20 +54,20 @@ describe('useUserSettings', () => {
     expect(storedSettings).toEqual(newSettings);
   });
 
-  it('should set and persist radiusKm, ignoring invalid numbers', async () => {
-    // Assemble
-    const { radiusKm, setRadiusKm } = useUserSettings();
+  it.each(
+    [-10, 0, NaN, Infinity]
+  )(
+    'should set and persist radiusKm, ignoring invalid numbers (%s)',
+    (testRadiusKm) =>
+    {
+      // Assemble
+      const { radiusKm, setRadiusKm } = useUserSettings();
 
-    // Act
-    setRadiusKm(-10);
+      // Act
+      setRadiusKm(testRadiusKm);
 
-    // Assert
-    expect(radiusKm.value).toBe(DEFAULT_USER_SETTINGS.radiusKm);
-
-    // Act
-    setRadiusKm(-10);
-
-    // Assert
-    expect(radiusKm.value).toBe(DEFAULT_USER_SETTINGS.radiusKm);
-  });
+      // Assert
+      expect(radiusKm.value).toBe(DEFAULT_USER_SETTINGS.radiusKm);
+    },
+  );
 });

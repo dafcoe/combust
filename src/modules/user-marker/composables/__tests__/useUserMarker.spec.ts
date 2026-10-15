@@ -2,7 +2,12 @@ import type { Map, MarkerOptions } from 'maplibre-gl';
 import { Marker } from 'maplibre-gl';
 import { nextTick, ref, shallowRef } from 'vue';
 import { useUserMarker } from '../useUserMarker';
-import { DEFAULT_COORDS, type GeolocationCoordinates, MADRID_COORDS } from '@/modules/geolocation';
+import {
+  DEFAULT_COORDS,
+  type GeolocationCoordinates,
+  lisbonCoordsFixture,
+  madridCoordsFixture,
+} from '@/modules/geolocation';
 import { cleanupScope, withScope } from '@/utils';
 
 const mockSetLngLat = vi.fn().mockReturnThis();
@@ -13,7 +18,6 @@ let capturedMarkerOptions: MarkerOptions | undefined;
 
 vi.mock('maplibre-gl', () => {
   return {
-    Map: vi.fn(),
     Marker: vi.fn(function (options?: MarkerOptions) {
       capturedMarkerOptions = options;
       return {
@@ -69,7 +73,7 @@ describe('useUserMarker', () => {
       );
 
       expect(mockSetLngLat).toHaveBeenCalledTimes(1);
-      expect(mockSetLngLat).toHaveBeenCalledWith([DEFAULT_COORDS.longitude, DEFAULT_COORDS.latitude]);
+      expect(mockSetLngLat).toHaveBeenCalledWith([lisbonCoordsFixture.longitude, lisbonCoordsFixture.latitude]);
 
       expect(mockAddTo).toHaveBeenCalledTimes(1);
       expect(mockAddTo).toHaveBeenCalledWith(mockMapInstance);
@@ -106,13 +110,13 @@ describe('useUserMarker', () => {
       initMarker();
       expect(mockSetLngLat).toHaveBeenCalledTimes(1);
 
-      mockCoords.value = { ...MADRID_COORDS };
+      mockCoords.value = { ...madridCoordsFixture };
       await nextTick();
 
       expect(mockSetLngLat).toHaveBeenCalledTimes(2);
       expect(mockSetLngLat).toHaveBeenLastCalledWith([
-        MADRID_COORDS.longitude,
-        MADRID_COORDS.latitude,
+        madridCoordsFixture.longitude,
+        madridCoordsFixture.latitude,
       ]);
     });
 
@@ -120,7 +124,7 @@ describe('useUserMarker', () => {
       const map = shallowRef<Map | null>(mockMapInstance);
       withScope(() => useUserMarker(map));
 
-      mockCoords.value = { ...MADRID_COORDS };
+      mockCoords.value = { ...madridCoordsFixture };
       await nextTick();
 
       expect(mockSetLngLat).not.toHaveBeenCalled();
@@ -156,7 +160,7 @@ describe('useUserMarker', () => {
 
       removeMarker();
 
-      mockCoords.value = { ...MADRID_COORDS };
+      mockCoords.value = { ...madridCoordsFixture };
       await nextTick();
 
       expect(mockSetLngLat).toHaveBeenCalledTimes(1);

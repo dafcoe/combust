@@ -9,12 +9,7 @@ import {
 } from '../useStations.ts';
 import type { FuelType } from '@/modules/fuel';
 import type { GeolocationCoordinates } from '@/modules/geolocation';
-import {
-  type IfcStation,
-  ifcStationBpLisboaFixture,
-  ifcStationGalpLisboaFixture,
-  ifcStationRepsolMadridFixture,
-} from '@/modules/iberian-fuel';
+import { type IfcStation, ifcStationsFixture } from '@/modules/iberian-fuel';
 import type { SortMode } from '@/modules/user-settings';
 
 const {
@@ -76,12 +71,6 @@ vi.mock('@/modules/user-settings', () => ({
     sortBy: mockSortBy,
   }),
 }));
-
-export const ifcStationsFixture: IfcStation[] = [
-  ifcStationGalpLisboaFixture,
-  ifcStationBpLisboaFixture,
-  ifcStationRepsolMadridFixture,
-];
 
 describe('useStations', () => {
   beforeEach(() => {

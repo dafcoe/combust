@@ -19,7 +19,6 @@ const mockMarkerInstances: Array<{
 
 vi.mock('maplibre-gl', () => {
   return {
-    Map: vi.fn(),
     Marker: vi.fn(function (options?: MarkerOptions) {
       const instance = {
         options,

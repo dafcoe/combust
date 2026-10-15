@@ -1,6 +1,6 @@
 import { readonly, ref } from 'vue';
-import { DEFAULT_COORDS } from '@/constants';
-import type { GeolocationCoordinates, GeolocationError, GeolocationPermissionStatus } from '@/types';
+import { DEFAULT_COORDS } from '../geolocation.constant.ts';
+import type { GeolocationCoordinates, GeolocationError, GeolocationPermissionStatus } from '../geolocation.type.ts';
 
 const coords = ref<GeolocationCoordinates>({ ...DEFAULT_COORDS });
 const permissionStatus = ref<GeolocationPermissionStatus>('prompt');

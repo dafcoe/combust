@@ -3,8 +3,7 @@ import { AttributionControl, Map, NavigationControl } from 'maplibre-gl';
 import { nextTick, ref } from 'vue';
 import { DEFAULT_MAP_ZOOM, MAP_STYLE_DARK, MAP_STYLE_LIGHT } from '../../interactive-map.constant';
 import { useInteractiveMap } from '../useInteractiveMap';
-import { DEFAULT_COORDS } from '@/constants';
-import type { GeolocationCoordinates } from '@/types';
+import { DEFAULT_COORDS } from '@/modules/geolocation';
 import { cleanupScope, withScope } from '@/utils';
 
 const mockAddControl = vi.fn();
@@ -38,13 +37,9 @@ vi.mock('maplibre-gl', () => {
   };
 });
 
-let mockCoords: ReturnType<typeof ref<GeolocationCoordinates>>;
 let mockIsDarkTheme: ReturnType<typeof ref<boolean>>;
 
 vi.mock('@/composables', () => ({
-  useGeolocation: () => ({
-    coords: mockCoords,
-  }),
   useTheme: () => ({
     isDarkTheme: mockIsDarkTheme,
   }),
@@ -54,7 +49,6 @@ describe('useInteractiveMap', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     capturedMapOptions = undefined;
-    mockCoords = ref<GeolocationCoordinates>({ ...DEFAULT_COORDS });
     mockIsDarkTheme = ref<boolean>(false);
   });
 

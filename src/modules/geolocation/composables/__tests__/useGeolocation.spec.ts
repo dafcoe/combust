@@ -1,3 +1,4 @@
+import { DEFAULT_COORDS, MADRID_COORDS } from '../../geolocation.constant.ts';
 import { resetState, useGeolocation } from '../useGeolocation.ts';
 import {
   mockGeolocationDenied,
@@ -6,8 +7,6 @@ import {
   mockPermissionsDenied,
   PERMISSION_DENIED,
 } from './useGeolocation.spec-utils.ts';
-import { DEFAULT_COORDS } from '@/constants';
-import { madridCoordsFixture } from '@/fixtures';
 
 describe('useGeolocation', () => {
   beforeEach(() => {
@@ -17,14 +16,14 @@ describe('useGeolocation', () => {
 
   it('should update state on successful getCurrentPosition', async () => {
     // Assemble
-    mockGeolocationSuccess(madridCoordsFixture.latitude, madridCoordsFixture.longitude);
+    mockGeolocationSuccess(MADRID_COORDS.latitude, MADRID_COORDS.longitude);
     const { coords, permissionStatus, isLocating, error, getCurrentPosition } = useGeolocation();
 
     // Act
     await getCurrentPosition();
 
     // Assert
-    expect(coords.value).toEqual(madridCoordsFixture);
+    expect(coords.value).toEqual(MADRID_COORDS);
     expect(permissionStatus.value).toBe('granted');
     expect(isLocating.value).toBe(false);
     expect(error.value).toBeNull();
@@ -79,14 +78,14 @@ describe('useGeolocation', () => {
 
   it('should update state on successful watchPosition', () => {
     // Assemble
-    mockGeolocationSuccess(madridCoordsFixture.latitude, madridCoordsFixture.longitude);
+    mockGeolocationSuccess(MADRID_COORDS.latitude, MADRID_COORDS.longitude);
     const { coords, permissionStatus, isLocating, error, watchPosition } = useGeolocation();
 
     // Act
     watchPosition();
 
     // Assert
-    expect(coords.value).toEqual(madridCoordsFixture);
+    expect(coords.value).toEqual(MADRID_COORDS);
     expect(permissionStatus.value).toBe('granted');
     expect(isLocating.value).toBe(false);
     expect(error.value).toBeNull();
@@ -125,7 +124,7 @@ describe('useGeolocation', () => {
 
   it('should call clearWatch on stopWatching', () => {
     // Assemble
-    mockGeolocationSuccess(madridCoordsFixture.latitude, madridCoordsFixture.longitude);
+    mockGeolocationSuccess(MADRID_COORDS.latitude, MADRID_COORDS.longitude);
     const { watchPosition, stopWatching } = useGeolocation();
 
     // Act

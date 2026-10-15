@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { Map, Marker } from 'maplibre-gl';
-import { nextTick, ref } from 'vue';
+import { nextTick } from 'vue';
 import InteractiveMap from '../InteractiveMap.vue';
 import { stationGalpLisboaFixture } from '@/fixtures';
 
@@ -36,15 +36,6 @@ vi.mock('maplibre-gl', () => {
     AttributionControl: vi.fn(function () { return {}; }),
   };
 });
-
-vi.mock('@/composables', () => ({
-  useGeolocation: () => ({
-    coords: ref({ latitude: 38.7223, longitude: -9.1393 }),
-  }),
-  useTheme: () => ({
-    isDarkTheme: ref(false),
-  }),
-}));
 
 describe('InteractiveMap', () => {
   beforeEach(() => {

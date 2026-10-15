@@ -7,7 +7,8 @@ import {
   stationGalpLisboaFixture,
   stationRepsolMadridFixture,
 } from '@/fixtures';
-import type { FuelType, GeolocationCoordinates, SortMode, Station } from '@/types';
+import type { GeolocationCoordinates } from '@/modules/geolocation';
+import type { FuelType, SortMode, Station } from '@/types';
 
 const {
   mockCoords,
@@ -35,11 +36,16 @@ const {
   };
 });
 
-vi.mock('@/composables/use-geolocation/useGeolocation', () => ({
-  useGeolocation: () => ({
-    coords: mockCoords,
-  }),
-}));
+vi.mock('@/modules/geolocation', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/modules/geolocation')>();
+
+  return {
+    ...actual,
+    useGeolocation: () => ({
+      coords: mockCoords,
+    }),
+  };
+});
 
 vi.mock('@/composables/use-iberian-fuel/useIberianFuel', () => ({
   useIberianFuel: () => ({

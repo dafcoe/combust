@@ -1,7 +1,8 @@
 import { AttributionControl, Map, type MapOptions, NavigationControl } from 'maplibre-gl';
 import { type Ref, shallowRef, watch } from 'vue';
 import { DEFAULT_MAP_ZOOM, MAP_STYLE_DARK, MAP_STYLE_LIGHT } from '../interactive-map.constant.ts';
-import { useGeolocation, useTheme } from '@/composables';
+import { useTheme } from '@/composables';
+import { useGeolocation } from '@/modules/geolocation';
 
 export function useInteractiveMap(mapContainer: Ref<HTMLDivElement | null>) {
   const map = shallowRef<Map | null>(null);

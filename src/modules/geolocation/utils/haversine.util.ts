@@ -1,6 +1,5 @@
-import type { GeolocationCoordinates } from '@/types';
-
-const EARTH_RADIUS_KM = 6_371;
+import { EARTH_RADIUS_KM } from '../geolocation.constant.ts';
+import type { GeolocationCoordinates } from '../geolocation.type.ts';
 
 function toRadians(degrees: number): number {
   return degrees * (Math.PI / 180);

@@ -2,9 +2,7 @@ import type { Map, MarkerOptions } from 'maplibre-gl';
 import { Marker } from 'maplibre-gl';
 import { nextTick, ref, shallowRef } from 'vue';
 import { useUserMarker } from '../useUserMarker';
-import { DEFAULT_COORDS } from '@/constants';
-import { madridCoordsFixture } from '@/fixtures';
-import type { GeolocationCoordinates } from '@/types';
+import { DEFAULT_COORDS, type GeolocationCoordinates, MADRID_COORDS } from '@/modules/geolocation';
 import { cleanupScope, withScope } from '@/utils';
 
 const mockSetLngLat = vi.fn().mockReturnThis();
@@ -30,11 +28,16 @@ vi.mock('maplibre-gl', () => {
 
 let mockCoords: ReturnType<typeof ref<GeolocationCoordinates>>;
 
-vi.mock('@/composables', () => ({
-  useGeolocation: () => ({
-    coords: mockCoords,
-  }),
-}));
+vi.mock('@/modules/geolocation', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/modules/geolocation')>();
+
+  return {
+    ...actual,
+    useGeolocation: () => ({
+      coords: mockCoords,
+    }),
+  };
+});
 
 describe('useUserMarker', () => {
   let mockMapInstance: Map;
@@ -103,13 +106,13 @@ describe('useUserMarker', () => {
       initMarker();
       expect(mockSetLngLat).toHaveBeenCalledTimes(1);
 
-      mockCoords.value = { ...madridCoordsFixture };
+      mockCoords.value = { ...MADRID_COORDS };
       await nextTick();
 
       expect(mockSetLngLat).toHaveBeenCalledTimes(2);
       expect(mockSetLngLat).toHaveBeenLastCalledWith([
-        madridCoordsFixture.longitude,
-        madridCoordsFixture.latitude,
+        MADRID_COORDS.longitude,
+        MADRID_COORDS.latitude,
       ]);
     });
 
@@ -117,7 +120,7 @@ describe('useUserMarker', () => {
       const map = shallowRef<Map | null>(mockMapInstance);
       withScope(() => useUserMarker(map));
 
-      mockCoords.value = { ...madridCoordsFixture };
+      mockCoords.value = { ...MADRID_COORDS };
       await nextTick();
 
       expect(mockSetLngLat).not.toHaveBeenCalled();
@@ -153,7 +156,7 @@ describe('useUserMarker', () => {
 
       removeMarker();
 
-      mockCoords.value = { ...madridCoordsFixture };
+      mockCoords.value = { ...MADRID_COORDS };
       await nextTick();
 
       expect(mockSetLngLat).toHaveBeenCalledTimes(1);

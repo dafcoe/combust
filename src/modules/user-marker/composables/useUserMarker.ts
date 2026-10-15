@@ -1,8 +1,8 @@
 import { Map, Marker, type MarkerOptions } from 'maplibre-gl';
 import { createVNode, type Ref, render, watch } from 'vue';
 import UserMarker from '../components/UserMarker.vue';
-import { useGeolocation } from '@/composables';
-import type { GeolocationCoordinates } from '@/types';
+import { useGeolocation } from '@/modules/geolocation';
+import type { GeolocationCoordinates } from '@/modules/geolocation';
 
 export function useUserMarker(map: Ref<Map | null>) {
   let marker: Marker | null = null;

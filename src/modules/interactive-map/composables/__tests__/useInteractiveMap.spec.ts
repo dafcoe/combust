@@ -39,7 +39,7 @@ vi.mock('maplibre-gl', () => {
 
 let mockIsDarkTheme: ReturnType<typeof ref<boolean>>;
 
-vi.mock('@/composables', () => ({
+vi.mock('@/modules/theme', () => ({
   useTheme: () => ({
     isDarkTheme: mockIsDarkTheme,
   }),

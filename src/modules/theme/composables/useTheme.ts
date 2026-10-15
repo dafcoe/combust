@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue';
+import type { ValidThemeMode } from '../theme.type';
 import { useUserSettings } from '@/modules/user-settings';
-import type { EffectiveThemeMode } from '@/types';
 
 const { theme: userSettingsTheme, setTheme } = useUserSettings();
 
@@ -9,7 +9,7 @@ const systemPrefersDark = ref(false);
 let mediaQueryList: MediaQueryList | null = null;
 let mediaQueryHandler: ((event: MediaQueryListEvent) => void) | null = null;
 
-const theme = computed<EffectiveThemeMode>(() => {
+const theme = computed<ValidThemeMode>(() => {
   if (userSettingsTheme.value === 'system') return systemPrefersDark.value ? 'dark' : 'light';
 
   return userSettingsTheme.value;

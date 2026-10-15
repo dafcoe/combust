@@ -1,4 +1,4 @@
-import { DEFAULT_THEME_MODE } from '../../constants/theme.constant.ts';
+import { DEFAULT_THEME_MODE } from '../theme/theme.constant.ts';
 import type { UserSettings } from './user-settings.type.ts';
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {

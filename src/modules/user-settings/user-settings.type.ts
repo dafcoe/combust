@@ -1,4 +1,5 @@
-import type { FuelType, SortMode, ThemeMode } from '@/types';
+import type { ThemeMode } from '@/modules/theme';
+import type { FuelType, SortMode } from '@/types';
 
 export type UserSettings = {
   theme: ThemeMode;

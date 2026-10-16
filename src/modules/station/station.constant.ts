@@ -1,0 +1,1 @@
+export const DEFAULT_BRAND_LOGO_URL = '/src/assets/brands/unknown.svg';

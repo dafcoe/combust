@@ -1,82 +1,55 @@
-import { computed, ref } from 'vue';
-import { mapIfcStationsToStations } from '../mappers/station.mapper';
+import {
+  computed,
+  readonly,
+  ref,
+} from 'vue';
+import { mapIfcStationsToStations } from '../mappers/station.mapper.ts';
 import type { Station } from '../station.type';
-import type { FuelType } from '@/modules/fuel';
-import { haversineDistanceKm, useGeolocation } from '@/modules/geolocation';
-import type { GeolocationCoordinates } from '@/modules/geolocation';
+import {
+  filterStations,
+  hydrateStationsDistance,
+  sortStations,
+} from '../utils/station.util.ts';
+import { useAppSettings } from '@/modules/app-settings';
+import { useGeolocation, type GeolocationCoordinates } from '@/modules/geolocation';
 import { useIberianFuel } from '@/modules/iberian-fuel';
-import { type SortMode, useUserSettings } from '@/modules/user-settings';
 
 const originCoords = ref<GeolocationCoordinates | null>(null);
 
+const {
+  stations: ifcStations,
+  isLoading,
+  error,
+  lastFetchedAt,
+  fetchStations,
+} = useIberianFuel();
+
+const { appSettings } = useAppSettings();
 const { coords: geolocationCoords } = useGeolocation();
-const { stations: ifcStations, isLoading, error, lastFetchedAt, fetchStations } = useIberianFuel();
-const { fuelType, radiusKm, sortBy } = useUserSettings();
 
 const computedOriginCoords = computed<GeolocationCoordinates>(() => originCoords.value ?? geolocationCoords.value);
 
 const stations = computed<Station[]>(() => {
+  const { fuelType, sortBy, radiusKm } = appSettings.value;
   const mappedStations = mapIfcStationsToStations(ifcStations.value);
-  const stationsWithDistance = hydrateStationsDistance(mappedStations);
-  const filtered = filterStations(stationsWithDistance, fuelType.value, radiusKm.value);
-  return sortStations(filtered, fuelType.value, sortBy.value);
+  const stationsWithDistance = hydrateStationsDistance(mappedStations, computedOriginCoords.value);
+  const filteredStations = filterStations(stationsWithDistance, fuelType, radiusKm);
+
+  return sortStations(filteredStations, fuelType, sortBy);
 });
 
-function hydrateStationsDistance(stationsWithoutDistance: Station[]): Station[] {
-  return stationsWithoutDistance.map((station) => ({
-    ...station,
-    distanceKm: haversineDistanceKm(computedOriginCoords.value, station.location),
-  }));
-}
-
-function filterStations(
-  stationsToFilter: Station[],
-  selectedFuelType: FuelType,
-  maxRadiusKm: number,
-): Station[] {
-  return stationsToFilter.filter((station) => {
-    const hasPrice = station.prices[selectedFuelType] !== null;
-    const isWithinRadius = station.distanceKm !== undefined && station.distanceKm <= maxRadiusKm;
-
-    return hasPrice && isWithinRadius;
-  });
-}
-
-function sortStations(
-  stationsToSort: Station[],
-  selectedFuelType: FuelType,
-  sortMode: SortMode,
-): Station[] {
-  return [...stationsToSort].sort((stationA: Station, stationB: Station) => {
-    if (sortMode === 'distance') {
-      const distanceA = stationA.distanceKm ?? Infinity;
-      const distanceB = stationB.distanceKm ?? Infinity;
-
-      return distanceA - distanceB;
-    }
-
-    const priceA = stationA.prices[selectedFuelType] ?? Infinity;
-    const priceB = stationB.prices[selectedFuelType] ?? Infinity;
-
-    return priceA - priceB;
-  });
-}
-
-function setOriginCoords(newOrigin: GeolocationCoordinates | null): void {
-  originCoords.value = newOrigin ? { ...newOrigin } : null;
-}
-
-export function resetStationsState(): void {
-  originCoords.value = null;
-}
-
 export function useStations() {
+  function setOriginCoords(newOrigin: GeolocationCoordinates | null): void {
+    originCoords.value = newOrigin ? { ...newOrigin } : null;
+  }
+
   return {
+    originCoords: readonly(originCoords),
+    setOriginCoords,
     stations,
     isLoading,
     error,
     lastFetchedAt,
-    fetchStations,
-    setOriginLocation: setOriginCoords,
+    loadStations: fetchStations,
   };
 }

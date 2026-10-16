@@ -1,55 +1,46 @@
-import type { MapOptions } from 'maplibre-gl';
-import { AttributionControl, Map, NavigationControl } from 'maplibre-gl';
+import {
+  AttributionControl,
+  Map,
+  NavigationControl,
+} from 'maplibre-gl';
 import { nextTick, ref } from 'vue';
-import { DEFAULT_MAP_ZOOM, MAP_STYLE_DARK, MAP_STYLE_LIGHT } from '../../interactive-map.constant';
+import {
+  DEFAULT_MAP_ZOOM,
+  MAP_STYLE_DARK_URL,
+  MAP_STYLE_LIGHT_URL,
+} from '../../interactive-map.constant';
 import { useInteractiveMap } from '../useInteractiveMap';
+import { mockIsThemeDark, resetAppSettingsMock } from '@/modules/app-settings/index.testing.ts';
 import { DEFAULT_COORDS } from '@/modules/geolocation';
-import { cleanupScope, withScope } from '@/utils';
+import {
+  cleanupScope,
+  mockAddControl,
+  mockMapInstance,
+  mockMapRemove,
+  mockOn,
+  mockResize,
+  mockSetStyle,
+  resetMaplibreGlMock,
+  withScope,
+} from '@/testing';
 
-const mockAddControl = vi.fn();
-const mockSetStyle = vi.fn();
-const mockMapRemove = vi.fn();
-const mockOn = vi.fn();
-const mockResize = vi.fn();
+vi.mock('maplibre-gl', () => import('@/testing/mocks/maplibre-gl.mock'));
 
-let capturedMapOptions: MapOptions | undefined;
+vi.mock('@/modules/app-settings', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/modules/app-settings')>();
+  const { mockUseAppSettings } = await import('@/modules/app-settings/index.testing.ts');
 
-const mockMapInstance = {
-  addControl: mockAddControl,
-  setStyle: mockSetStyle,
-  remove: mockMapRemove,
-  on: mockOn,
-  resize: mockResize,
-};
-
-vi.mock('maplibre-gl', () => {
   return {
-    Map: vi.fn(function (options?: MapOptions) {
-      capturedMapOptions = options;
-      return mockMapInstance;
-    }),
-    AttributionControl: vi.fn(function (options?: unknown) {
-      return { options };
-    }),
-    NavigationControl: vi.fn(function (options?: unknown) {
-      return { options };
-    }),
+    ...actual,
+    useAppSettings: mockUseAppSettings,
   };
 });
-
-let mockIsDarkTheme: ReturnType<typeof ref<boolean>>;
-
-vi.mock('@/modules/theme', () => ({
-  useTheme: () => ({
-    isDarkTheme: mockIsDarkTheme,
-  }),
-}));
 
 describe('useInteractiveMap', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    capturedMapOptions = undefined;
-    mockIsDarkTheme = ref<boolean>(false);
+    resetMaplibreGlMock();
+    resetAppSettingsMock();
   });
 
   afterEach(() => {
@@ -77,9 +68,9 @@ describe('useInteractiveMap', () => {
       initMap();
 
       expect(Map).toHaveBeenCalledTimes(1);
-      expect(capturedMapOptions).toEqual({
+      expect(mockMapInstance.options).toEqual({
         container: containerElement,
-        style: MAP_STYLE_LIGHT,
+        style: MAP_STYLE_LIGHT_URL,
         center: [DEFAULT_COORDS.longitude, DEFAULT_COORDS.latitude],
         zoom: DEFAULT_MAP_ZOOM,
         attributionControl: false,
@@ -87,15 +78,15 @@ describe('useInteractiveMap', () => {
       expect(map.value).toBe(mockMapInstance);
     });
 
-    it('creates map with dark style when isDarkTheme is initially true', () => {
-      mockIsDarkTheme.value = true;
+    it('creates map with dark style when isThemeDark is initially true', () => {
+      mockIsThemeDark.value = true;
       const containerElement = document.createElement('div');
       const mapContainer = ref<HTMLDivElement | null>(containerElement);
       const { initMap } = withScope(() => useInteractiveMap(mapContainer));
 
       initMap();
 
-      expect(capturedMapOptions?.style).toBe(MAP_STYLE_DARK);
+      expect(mockMapInstance.options?.style).toBe(MAP_STYLE_DARK_URL);
     });
 
     it('adds attribution and navigation controls to the map', () => {
@@ -136,7 +127,7 @@ describe('useInteractiveMap', () => {
   });
 
   describe('reactivity to theme changes', () => {
-    it('updates map style when isDarkTheme changes after initialization', async () => {
+    it('updates map style when isThemeDark changes after initialization', async () => {
       const containerElement = document.createElement('div');
       const mapContainer = ref<HTMLDivElement | null>(containerElement);
       const { initMap } = withScope(() => useInteractiveMap(mapContainer));
@@ -144,25 +135,25 @@ describe('useInteractiveMap', () => {
       initMap();
       expect(mockSetStyle).not.toHaveBeenCalled();
 
-      mockIsDarkTheme.value = true;
+      mockIsThemeDark.value = true;
       await nextTick();
 
       expect(mockSetStyle).toHaveBeenCalledTimes(1);
-      expect(mockSetStyle).toHaveBeenCalledWith(MAP_STYLE_DARK);
+      expect(mockSetStyle).toHaveBeenCalledWith(MAP_STYLE_DARK_URL);
 
-      mockIsDarkTheme.value = false;
+      mockIsThemeDark.value = false;
       await nextTick();
 
       expect(mockSetStyle).toHaveBeenCalledTimes(2);
-      expect(mockSetStyle).toHaveBeenLastCalledWith(MAP_STYLE_LIGHT);
+      expect(mockSetStyle).toHaveBeenLastCalledWith(MAP_STYLE_LIGHT_URL);
     });
 
-    it('does not update map style when isDarkTheme changes if map is not initialized', async () => {
+    it('does not update map style when isThemeDark changes if map is not initialized', async () => {
       const containerElement = document.createElement('div');
       const mapContainer = ref<HTMLDivElement | null>(containerElement);
       withScope(() => useInteractiveMap(mapContainer));
 
-      mockIsDarkTheme.value = true;
+      mockIsThemeDark.value = true;
       await nextTick();
 
       expect(mockSetStyle).not.toHaveBeenCalled();
@@ -193,7 +184,7 @@ describe('useInteractiveMap', () => {
       expect(mockMapRemove).not.toHaveBeenCalled();
     });
 
-    it('does not update map style when isDarkTheme changes after map removal', async () => {
+    it('does not update map style when isThemeDark changes after map removal', async () => {
       const containerElement = document.createElement('div');
       const mapContainer = ref<HTMLDivElement | null>(containerElement);
       const { initMap, removeMap } = withScope(() => useInteractiveMap(mapContainer));
@@ -201,7 +192,7 @@ describe('useInteractiveMap', () => {
       initMap();
       removeMap();
 
-      mockIsDarkTheme.value = true;
+      mockIsThemeDark.value = true;
       await nextTick();
 
       expect(mockSetStyle).not.toHaveBeenCalled();

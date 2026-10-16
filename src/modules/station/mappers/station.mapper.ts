@@ -1,10 +1,14 @@
-import type { Fuel } from '@dafcoe/iberian-fuel-client';
 import type { DeepReadonly } from 'vue';
 import type { Station } from '../station.type.ts';
+import { getBrandLogoUrl } from '../utils/brand.util.ts';
 import type { FuelPrices } from '@/modules/fuel';
-import { IFC_FUEL_NAME, type IfcStation } from '@/modules/iberian-fuel';
+import {
+  IFC_FUEL_NAME,
+  type IfcFuel,
+  type IfcStation,
+} from '@/modules/iberian-fuel';
 
-function mapIfcStationFuelsToFuelPrices(ifcStationFuels: readonly Fuel[] | DeepReadonly<Fuel[]>): FuelPrices {
+function mapIfcStationFuelsToFuelPrices(ifcStationFuels: readonly IfcFuel[] | DeepReadonly<IfcFuel[]>): FuelPrices {
   const prices: FuelPrices = {
     gasoline95: null,
     gasoline98: null,
@@ -32,6 +36,7 @@ function mapIfcStationToStation(ifcStation: IfcStation | DeepReadonly<IfcStation
     id: ifcStation.id,
     name: ifcStation.name,
     brand: ifcStation.brand,
+    brandLogoUrl: getBrandLogoUrl(ifcStation.brand),
     location: {
       latitude: ifcStation.address.latitude,
       longitude: ifcStation.address.longitude,

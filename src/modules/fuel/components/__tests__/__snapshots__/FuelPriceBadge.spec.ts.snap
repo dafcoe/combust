@@ -1,0 +1,86 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`FuelPriceBadge > fuel type style classes > should match the style classes snapshot for diesel 1`] = `
+[
+  "fuel-price-badge",
+  "p-0.5",
+  "w-full",
+  "text-[11px]",
+  "font-medium",
+  "leading-none",
+  "bg-amber-200",
+  "dark:bg-amber-950/40",
+  "border-amber-300/80",
+  "dark:border-amber-800/80",
+  "text-amber-900",
+  "dark:text-amber-300",
+]
+`;
+
+exports[`FuelPriceBadge > fuel type style classes > should match the style classes snapshot for gasoline95 1`] = `
+[
+  "fuel-price-badge",
+  "p-0.5",
+  "w-full",
+  "text-[11px]",
+  "font-medium",
+  "leading-none",
+  "bg-emerald-200",
+  "dark:bg-emerald-950/40",
+  "border-emerald-300/80",
+  "dark:border-emerald-800/80",
+  "text-emerald-900",
+  "dark:text-emerald-300",
+]
+`;
+
+exports[`FuelPriceBadge > fuel type style classes > should match the style classes snapshot for gasoline98 1`] = `
+[
+  "fuel-price-badge",
+  "p-0.5",
+  "w-full",
+  "text-[11px]",
+  "font-medium",
+  "leading-none",
+  "bg-sky-200",
+  "dark:bg-sky-950/40",
+  "border-sky-300/80",
+  "dark:border-sky-800/80",
+  "text-sky-900",
+  "dark:text-sky-300",
+]
+`;
+
+exports[`FuelPriceBadge > fuel type style classes > should match the style classes snapshot for lpg 1`] = `
+[
+  "fuel-price-badge",
+  "p-0.5",
+  "w-full",
+  "text-[11px]",
+  "font-medium",
+  "leading-none",
+  "bg-purple-200",
+  "dark:bg-purple-950/40",
+  "border-purple-300/80",
+  "dark:border-purple-800/80",
+  "text-purple-900",
+  "dark:text-purple-300",
+]
+`;
+
+exports[`FuelPriceBadge > static classes > should match the base utility classes snapshot 1`] = `
+[
+  "fuel-price-badge",
+  "p-0.5",
+  "w-full",
+  "text-[11px]",
+  "font-medium",
+  "leading-none",
+  "bg-emerald-200",
+  "dark:bg-emerald-950/40",
+  "border-emerald-300/80",
+  "dark:border-emerald-800/80",
+  "text-emerald-900",
+  "dark:text-emerald-300",
+]
+`;

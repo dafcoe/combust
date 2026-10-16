@@ -1,11 +1,20 @@
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
+import { defineConfig } from 'eslint/config';
+import importNewlines from 'eslint-plugin-import-newlines';
 import importPlugin from 'eslint-plugin-import-x';
 import vuePlugin from 'eslint-plugin-vue';
 import tseslint from 'typescript-eslint';
 import vueParser from 'vue-eslint-parser';
+import { eslintRuleSettings } from './config/eslint/rule-settings/eslint.ts';
+import { importNewlinesRuleSettings } from './config/eslint/rule-settings/import-newlines.ts';
+import { importXRuleSettings } from './config/eslint/rule-settings/import-x.ts';
+import { moduleBoundariesRuleSettings } from './config/eslint/rule-settings/module-boundaries.ts';
+import { stylisticRuleSettings } from './config/eslint/rule-settings/stylistic.ts';
+import { typescriptRuleSettings } from './config/eslint/rule-settings/typescript.ts';
+import { moduleBoundariesRule } from './config/eslint/rules/module-boundaries.ts';
 
-export default tseslint.config(
+export default defineConfig(
   { ignores: ['dist/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -25,43 +34,20 @@ export default tseslint.config(
     plugins: {
       '@stylistic': stylistic,
       import: importPlugin,
+      'import-newlines': importNewlines,
+      modules: {
+        rules: {
+          boundaries: moduleBoundariesRule,
+        },
+      },
     },
     rules: {
-      // eslint
-      'no-empty': ['error', { allowEmptyCatch: true }],
-      'no-undef': 'off',
-      // stylistic
-      '@stylistic/indent': ['error', 2],
-      '@stylistic/quotes': ['error', 'single'],
-      '@stylistic/semi': ['error', 'always'],
-      '@stylistic/comma-dangle': ['error', 'always-multiline'],
-      '@stylistic/arrow-parens': ['error', 'always'],
-      '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: true }],
-      '@stylistic/quote-props': ['error', 'as-needed'],
-      '@stylistic/block-spacing': ['error', 'always'],
-      '@stylistic/operator-linebreak': ['error', 'before', { overrides: { '=': 'after' } }],
-      // import-x
-      'import/order': [
-        'error',
-        {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-          ],
-          alphabetize: {
-            order: 'asc',
-            caseInsensitive: true,
-          },
-        },
-      ],
-      // typescript
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/explicit-function-return-type': 'off',
+      ...eslintRuleSettings,
+      ...stylisticRuleSettings,
+      ...importXRuleSettings,
+      ...importNewlinesRuleSettings,
+      ...typescriptRuleSettings,
+      ...moduleBoundariesRuleSettings,
     },
   },
 );

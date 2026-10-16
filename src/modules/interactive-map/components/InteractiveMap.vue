@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, toRef, useTemplateRef } from 'vue';
-import type { InteractiveMapEmits, InteractiveMapProps } from '../interactive-map.type.ts';
+import {
+  onMounted,
+  onUnmounted,
+  toRef,
+  useTemplateRef,
+} from 'vue';
 import { useInteractiveMap } from '../composables/useInteractiveMap.ts';
-import { dummyStationFixture, type Station } from '@/modules/station';
-import { useStationMarkers } from '@/modules/station-marker';
-import { useUserMarker } from '@/modules/user-marker';
+import { useStationMarkers } from '../composables/useStationMarkers.ts';
+import { useUserMarker } from '../composables/useUserMarker.ts';
+import type { InteractiveMapEmits, InteractiveMapProps } from '../interactive-map.type.ts';
+import { type Station } from '@/modules/station';
 
 const props = withDefaults(defineProps<InteractiveMapProps>(), {
-  stations: () => [dummyStationFixture],
+  stations: () => [],
 });
 
 const emits = defineEmits<InteractiveMapEmits>();

@@ -1,5 +1,5 @@
-export type {
-  Address as IfcAddress,
-  Fuel as IfcFuel,
-  Station as IfcStation,
+export {
+  FUEL_NAME as IFC_FUEL_NAME,
+  type Fuel as IfcFuel,
+  type Station as IfcStation,
 } from '@dafcoe/iberian-fuel-client';

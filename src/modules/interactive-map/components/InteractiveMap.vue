@@ -60,3 +60,9 @@ onUnmounted(removeInteractiveMap);
     />
   </div>
 </template>
+
+<style scoped lang="scss">
+:global(.maplibregl-marker:has(.station-marker--selected)) {
+  z-index: 10;
+}
+</style>

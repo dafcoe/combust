@@ -126,7 +126,6 @@ function handleSelect(): void {
   }
 
   &--selected {
-    @apply z-30;
     @apply -translate-y-1.5;
 
     #{$root} {
@@ -151,7 +150,6 @@ function handleSelect(): void {
   }
 
   &:hover {
-    @apply z-20;
     @apply -translate-y-1.5;
   }
 }

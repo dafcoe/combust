@@ -26,22 +26,6 @@ const selectedPrice = computed((): number | null => {
   return props.station.prices[props.selectedFuelType] ?? null;
 });
 
-const dynamicClassList = computed(() => {
-  if (props.isSelected) {
-    return {
-      marker: 'scale-105 z-30',
-      card: 'bg-white dark:bg-slate-900 border-blue-500 shadow-blue-500/20 ring-2 ring-blue-500/50',
-      cardPin: 'bg-white dark:bg-slate-900 border-blue-500',
-    };
-  }
-
-  return {
-    marker: 'hover:scale-105 hover:z-20',
-    card: 'bg-white/95 dark:bg-slate-900/95 border-slate-200/90 dark:border-slate-700/90 hover:border-slate-300 dark:hover:border-slate-600',
-    cardPin: 'bg-white/95 dark:bg-slate-900/95 border-slate-200/90 dark:border-slate-700/90',
-  };
-});
-
 const availableFuels = computed((): FuelType[] => {
   return FUEL_TYPES.filter((fuelType: FuelType) => {
     const price = props.station.prices[fuelType];
@@ -70,21 +54,17 @@ function handleSelect(): void {
 
 <template>
   <div
-    class="station-marker group relative inline-flex flex-col items-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded-xl transition-transform duration-200"
-    :class="dynamicClassList.marker"
+    class="station-marker"
+    :class="{ 'station-marker--selected': isSelected }"
     role="button"
     tabindex="0"
+    data-testid="station-marker"
     :aria-label="ariaLabel"
     @click="handleSelect"
-    data-testid="station-marker"
     @keydown.enter="handleSelect"
     @keydown.space.prevent="handleSelect"
   >
-    <!-- Marker Card Bubble -->
-    <div
-      class="station-marker__card relative z-1 flex flex-col items-center overflow-hidden border rounded-xl min-w-8 shadow-md backdrop-blur-md transition-colors duration-200"
-      :class="dynamicClassList.card"
-    >
+    <div class="station-marker__card">
       <div class="w-6 h-6 shrink-0">
         <img
           :src="station.brandLogoUrl"
@@ -92,19 +72,87 @@ function handleSelect(): void {
           class="w-full h-full object-contain"
         >
       </div>
+
       <FuelPriceBadge
         v-for="fuel in availableFuels"
         :key="fuel"
         :fuel-type="fuel"
         :price="station.prices[fuel]"
-        class="w-full p-0.5 text-[11px] font-medium leading-none"
       />
     </div>
 
-    <!-- Map Pin Anchor Pointer (Triangle at bottom) -->
-    <div
-      class="station-marker__card-pin z-0 w-2.5 h-2.5 -mt-1.5 rotate-45 border-r border-b transition-colors duration-200 shadow-sm"
-      :class="dynamicClassList.cardPin"
-    />
+    <div class="station-marker__card-pin" />
   </div>
 </template>
+
+<style scoped lang="scss">
+@reference '../../../styles/tailwind.css';
+
+.station-marker {
+  $root: &;
+
+  @apply inline-flex flex-col items-center;
+  @apply cursor-pointer select-none outline-none;
+  @apply transition-transform duration-300;
+
+  &__card {
+    @apply z-1;
+    @apply flex flex-col items-center;
+    @apply rounded-lg border-2 border-white;
+    @apply min-w-8 overflow-hidden;
+    @apply bg-white;
+    @apply backdrop-blur-md;
+    @apply transition-colors duration-200;
+
+    @variant dark {
+      @apply border-gray-700/60;
+      @apply bg-gray-700/60;
+    }
+  }
+
+  &__card-pin {
+    @apply -mt-1.5;
+    @apply border-r-2 border-b-2 border-white;
+    @apply w-2.5 h-2.5;
+    @apply bg-white;
+    @apply backdrop-blur-md;
+    @apply rotate-45 shadow-sm;
+    @apply transition-colors duration-200;
+
+    @variant dark {
+      @apply border-gray-700/60;
+      @apply bg-gray-700/60;
+    }
+  }
+
+  &--selected {
+    @apply z-30;
+    @apply -translate-y-1.5;
+
+    #{$root} {
+      &__card {
+        @apply border-gray-400;
+
+        @variant dark {
+          @apply border-gray-500;
+        }
+      }
+
+      &__card-pin {
+        @apply border-gray-400;
+        @apply bg-gray-400;
+
+        @variant dark {
+          @apply border-gray-500;
+          @apply bg-gray-500;
+        }
+      }
+    }
+  }
+
+  &:hover {
+    @apply z-20;
+    @apply -translate-y-1.5;
+  }
+}
+</style>

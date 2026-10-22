@@ -112,6 +112,41 @@ describe('useStationMarkers', () => {
       expect(onSelectCallback).toHaveBeenCalledTimes(1);
       expect(onSelectCallback).toHaveBeenCalledWith(stationGalpLisbonFixture);
     });
+
+    it('updates marker selection in place without removing or recreating markers', async () => {
+      const map = shallowRef<Map | null>(mockMapInstance);
+      const stations = ref<Station[]>([stationGalpLisbonFixture, stationRepsolMadridFixture]);
+      const selectedFuelType = ref<FuelType | undefined>(undefined);
+      const onSelectCallback = vi.fn();
+      const { initMarkers } = withScope(() =>
+        useStationMarkers(map, stations, selectedFuelType, onSelectCallback),
+      );
+
+      initMarkers();
+
+      const galpEl = mockMarkerInstances[0].options?.element as HTMLElement;
+      const repsolEl = mockMarkerInstances[1].options?.element as HTMLElement;
+
+      const galpMarker = galpEl.querySelector('.station-marker') as HTMLElement;
+      const repsolMarker = repsolEl.querySelector('.station-marker') as HTMLElement;
+
+      expect(galpMarker.classList.contains('station-marker--selected')).toBe(false);
+      expect(repsolMarker.classList.contains('station-marker--selected')).toBe(false);
+
+      galpMarker.click();
+      await nextTick();
+
+      expect(galpMarker.classList.contains('station-marker--selected')).toBe(true);
+      expect(repsolMarker.classList.contains('station-marker--selected')).toBe(false);
+      expect(mockMarkerRemove).not.toHaveBeenCalled();
+
+      repsolMarker.click();
+      await nextTick();
+
+      expect(galpMarker.classList.contains('station-marker--selected')).toBe(false);
+      expect(repsolMarker.classList.contains('station-marker--selected')).toBe(true);
+      expect(mockMarkerRemove).not.toHaveBeenCalled();
+    });
   });
 
   describe('reactivity to state changes', () => {

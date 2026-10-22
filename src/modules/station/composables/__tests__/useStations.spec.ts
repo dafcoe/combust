@@ -13,6 +13,7 @@ import {
   ifcStationBpLisbonFixture,
   ifcStationGalpLisbonFixture,
   ifcStationMoeveMadridFixture,
+  ifcStationRepsolLisbonFixture,
   ifcStationRepsolMadridFixture,
   ifcStationsFixture,
 } from '@/modules/iberian-fuel/index.testing.ts';
@@ -162,28 +163,31 @@ describe('useStations', () => {
 
       // In Lisbon with radius 10 km:
       // Galp Lisbon has diesel and is ~0.5 km away -> included
+      // Repsol Lisbon has diesel and is ~1.9 km away -> included
       // Repsol Madrid has diesel but is ~502 km away -> excluded
       // BP Lisbon has no diesel price -> excluded
       // Moeve Madrid has no diesel price -> excluded
-      expect(stations.value).toHaveLength(1);
-      expect(stations.value[0].id).toBe(ifcStationGalpLisbonFixture.id);
-      expect(stations.value[0].distanceKm).toBeLessThan(1);
+      expect(stations.value).toHaveLength(2);
+      expect(stations.value.map((s) => s.id)).toEqual([
+        ifcStationGalpLisbonFixture.id,
+        ifcStationRepsolLisbonFixture.id,
+      ]);
     });
 
     it('updates stations when fuelType changes in appSettings', async () => {
       const { stations } = withScope(() => useStations());
 
-      expect(stations.value).toHaveLength(1);
+      expect(stations.value).toHaveLength(2);
       expect(stations.value[0].id).toBe(ifcStationGalpLisbonFixture.id);
 
-      // Change fuelType to an unstocked fuel for all Lisbon stations
+      // Change fuelType to 'lpg'
       mockAppSettings.value = {
         ...mockAppSettings.value,
         fuelType: 'lpg',
       };
       await nextTick();
 
-      // Galp Lisbon also has LPG
+      // Galp Lisbon has LPG (Repsol Lisbon does not)
       expect(stations.value).toHaveLength(1);
       expect(stations.value[0].prices.lpg).toBe(0.949);
 
@@ -198,8 +202,11 @@ describe('useStations', () => {
       const { stations } = withScope(() => useStations());
 
       // Radius 10 km from Lisbon excludes Madrid
-      expect(stations.value).toHaveLength(1);
-      expect(stations.value.map((s) => s.id)).toEqual([ifcStationGalpLisbonFixture.id]);
+      expect(stations.value).toHaveLength(2);
+      expect(stations.value.map((s) => s.id)).toEqual([
+        ifcStationGalpLisbonFixture.id,
+        ifcStationRepsolLisbonFixture.id,
+      ]);
 
       // Increase radius to 600 km to include Repsol Madrid
       mockAppSettings.value = {
@@ -208,13 +215,12 @@ describe('useStations', () => {
       };
       await nextTick();
 
-      expect(stations.value).toHaveLength(2);
-      expect(stations.value.map((s) => s.id)).toContain(ifcStationRepsolMadridFixture.id);
+      expect(stations.value).toHaveLength(3);
+      expect(stations.value.map((station) => station.id)).toContain(ifcStationRepsolMadridFixture.id);
     });
 
     it('updates stations sort order when sortBy changes in appSettings', async () => {
-      // Set radius to 600 km so both Galp Lisbon (diesel 1.619, ~0.5 km)
-      // and Repsol Madrid (diesel 1.589, ~502 km) are included
+      // Set radius to 600 km so Galp Lisbon, Repsol Lisbon, and Repsol Madrid are included
       mockAppSettings.value = {
         ...mockAppSettings.value,
         radiusKm: 600,
@@ -224,36 +230,42 @@ describe('useStations', () => {
 
       const { stations } = withScope(() => useStations());
 
-      // Sorted by distance: Galp (~0.5 km) first, Repsol (~502 km) second
-      expect(stations.value.map((s) => s.id)).toEqual([
+      // Sorted by distance: Galp (~0.5 km) first, Repsol Lisbon (~1.9 km) second, Repsol Madrid (~502 km) third
+      expect(stations.value.map((station) => station.id)).toEqual([
         ifcStationGalpLisbonFixture.id,
+        ifcStationRepsolLisbonFixture.id,
         ifcStationRepsolMadridFixture.id,
       ]);
 
-      // Switch to sortBy 'price': Repsol (1.589) is cheaper than Galp (1.619)
+      // Switch to sortBy 'price':
+      // Diesel prices: Repsol Madrid (1.589) < Galp Lisbon (1.619) < Repsol Lisbon (1.719)
       mockAppSettings.value = {
         ...mockAppSettings.value,
         sortBy: 'price',
       };
       await nextTick();
 
-      expect(stations.value.map((s) => s.id)).toEqual([
+      expect(stations.value.map((station) => station.id)).toEqual([
         ifcStationRepsolMadridFixture.id,
         ifcStationGalpLisbonFixture.id,
+        ifcStationRepsolLisbonFixture.id,
       ]);
     });
 
     it('updates stations when custom originCoords is set', async () => {
       const { stations, setOriginCoords } = withScope(() => useStations());
 
-      // Default origin is Lisbon: Galp is included, Repsol is excluded
-      expect(stations.value.map((s) => s.id)).toEqual([ifcStationGalpLisbonFixture.id]);
+      // Default origin is Lisbon: Galp and Repsol Lisbon are included, Madrid is excluded
+      expect(stations.value.map((station) => station.id)).toEqual([
+        ifcStationGalpLisbonFixture.id,
+        ifcStationRepsolLisbonFixture.id,
+      ]);
 
       // Change origin to Madrid: Repsol is included (~0.4 km), Galp is excluded (~502 km)
       setOriginCoords(madridGeolocationCoordinatesFixture);
       await nextTick();
 
-      expect(stations.value.map((s) => s.id)).toEqual([ifcStationRepsolMadridFixture.id]);
+      expect(stations.value.map((station) => station.id)).toEqual([ifcStationRepsolMadridFixture.id]);
       expect(stations.value[0].distanceKm).toBeLessThan(1);
     });
 
@@ -262,24 +274,30 @@ describe('useStations', () => {
 
       setOriginCoords(madridGeolocationCoordinatesFixture);
       await nextTick();
-      expect(stations.value.map((s) => s.id)).toEqual([ifcStationRepsolMadridFixture.id]);
+      expect(stations.value.map((station) => station.id)).toEqual([ifcStationRepsolMadridFixture.id]);
 
       // Clear originCoords -> falls back to Lisbon geolocation
       setOriginCoords(null);
       await nextTick();
-      expect(stations.value.map((s) => s.id)).toEqual([ifcStationGalpLisbonFixture.id]);
+      expect(stations.value.map((station) => station.id)).toEqual([
+        ifcStationGalpLisbonFixture.id,
+        ifcStationRepsolLisbonFixture.id,
+      ]);
     });
 
     it('updates stations when geolocationCoords changes while originCoords is null', async () => {
       const { stations } = withScope(() => useStations());
 
-      expect(stations.value.map((s) => s.id)).toEqual([ifcStationGalpLisbonFixture.id]);
+      expect(stations.value.map((station) => station.id)).toEqual([
+        ifcStationGalpLisbonFixture.id,
+        ifcStationRepsolLisbonFixture.id,
+      ]);
 
       // Move geolocation to Madrid
       mockCoords.value = { ...madridGeolocationCoordinatesFixture };
       await nextTick();
 
-      expect(stations.value.map((s) => s.id)).toEqual([ifcStationRepsolMadridFixture.id]);
+      expect(stations.value.map((station) => station.id)).toEqual([ifcStationRepsolMadridFixture.id]);
     });
 
     it('does not use geolocationCoords when custom originCoords is active', async () => {
@@ -288,19 +306,19 @@ describe('useStations', () => {
       // Pin origin to Madrid
       setOriginCoords(madridGeolocationCoordinatesFixture);
       await nextTick();
-      expect(stations.value.map((s) => s.id)).toEqual([ifcStationRepsolMadridFixture.id]);
+      expect(stations.value.map((station) => station.id)).toEqual([ifcStationRepsolMadridFixture.id]);
 
       // Geolocation changes to Lisbon, but custom origin (Madrid) takes precedence
       mockCoords.value = { ...lisbonGeolocationCoordinatesFixture };
       await nextTick();
 
-      expect(stations.value.map((s) => s.id)).toEqual([ifcStationRepsolMadridFixture.id]);
+      expect(stations.value.map((station) => station.id)).toEqual([ifcStationRepsolMadridFixture.id]);
     });
 
     it('updates stations when ifcStations receives new data', async () => {
       const { stations } = withScope(() => useStations());
 
-      expect(stations.value).toHaveLength(1);
+      expect(stations.value).toHaveLength(2);
 
       mockIfcStations.value = [];
       await nextTick();

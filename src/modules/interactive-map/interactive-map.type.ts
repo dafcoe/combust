@@ -14,7 +14,7 @@ export type StationMarkerEmits = {
 };
 
 export type StationMarkerInstance = {
-  stationId: string;
+  station: Station;
   element: HTMLDivElement;
   marker: Marker;
 };

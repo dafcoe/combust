@@ -100,9 +100,35 @@ export const stationMoeveMadridFixture: Station = {
   },
 };
 
+export const stationRepsolLisbonFixture: Station = {
+  id: 'PT-10003',
+  name: 'Repsol Campo de Ourique',
+  brand: 'Repsol',
+  brandLogoUrl: '/src/assets/brands/repsol.svg',
+  address: {
+    country: 'Portugal',
+    district: 'Lisboa',
+    municipality: 'Lisboa',
+    postalCode: '1290-102',
+    street: 'Campo de Ourique 100',
+    town: 'Lisboa',
+  },
+  location: {
+    latitude: 38.7213,
+    longitude: -9.1674,
+  },
+  prices: {
+    diesel: 1.719,
+    gasoline95: 1.859,
+    gasoline98: 1.999,
+    lpg: null,
+  },
+};
+
 export const stationsFixture: Station[] = [
   stationGalpLisbonFixture,
   stationRepsolMadridFixture,
   stationBpLisbonFixture,
   stationMoeveMadridFixture,
+  stationRepsolLisbonFixture,
 ];

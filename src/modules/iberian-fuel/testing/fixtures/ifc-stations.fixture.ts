@@ -114,9 +114,46 @@ export const ifcStationMoeveMadridFixture: IfcStation = {
   ],
 };
 
+export const ifcStationRepsolLisbonFixture: IfcStation = {
+  id: 'PT-10003',
+  name: 'Repsol Campo de Ourique',
+  brand: 'Repsol',
+  address: {
+    street: 'Campo de Ourique 100',
+    postalCode: '1290-102',
+    town: 'Lisboa',
+    municipality: 'Lisboa',
+    district: 'Lisboa',
+    country: COUNTRY_NAME.PT,
+    latitude: 38.7213,
+    longitude: -9.1674,
+  },
+  fuels: [
+    {
+      id: 'PT-10001-diesel',
+      name: 'Diesel',
+      price: 1.719,
+      updatedAt: new Date('2026-10-17T08:00:00Z'),
+    },
+    {
+      id: 'PT-10001-gasoline95',
+      name: 'Gasoline 95',
+      price: 1.859,
+      updatedAt: new Date('2026-10-17T08:00:00Z'),
+    },
+    {
+      id: 'PT-10001-gasoline98',
+      name: 'Gasoline 98',
+      price: 1.999,
+      updatedAt: new Date('2026-10-17T08:00:00Z'),
+    },
+  ],
+};
+
 export const ifcStationsFixture: IfcStation[] = [
   ifcStationGalpLisbonFixture,
   ifcStationRepsolMadridFixture,
   ifcStationBpLisbonFixture,
   ifcStationMoeveMadridFixture,
+  ifcStationRepsolLisbonFixture,
 ];

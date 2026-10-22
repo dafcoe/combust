@@ -1,7 +1,6 @@
 import { IberianFuelClient } from '@dafcoe/iberian-fuel-client';
 import { readonly, ref } from 'vue';
 import type { IfcStation } from '../iberian-fuel.type.ts';
-import { ifcStationsFixture } from '../testing/fixtures/ifc-stations.fixture.ts';
 
 const ifcClient = new IberianFuelClient();
 
@@ -18,8 +17,7 @@ export function useIberianFuel() {
     error.value = null;
 
     try {
-      stations.value = ifcStationsFixture;
-      // stations.value = await ifcClient.getStations();
+      stations.value = await ifcClient.getStations();
       lastFetchedAt.value = new Date();
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch iberian fuel client stations';

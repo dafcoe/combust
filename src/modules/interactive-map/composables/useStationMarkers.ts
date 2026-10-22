@@ -24,8 +24,7 @@ export function useStationMarkers(
   const selectedStationId = ref<string | null>(null);
   let markers: StationMarkerInstance[] = [];
 
-  function createMarkerElement(station: Station): HTMLDivElement {
-    const markerEl = document.createElement('div');
+  function createMarkerVNode(station: Station, markerEl: HTMLElement): void {
     const onSelect = (selectedStation: Station) => {
       selectedStationId.value = selectedStation.id;
       onSelectCallback?.(selectedStation);
@@ -39,20 +38,24 @@ export function useStationMarkers(
     });
 
     render(markerVNode, markerEl);
+  }
 
-    return markerEl;
+  function createMarkerElement(): HTMLDivElement {
+    return document.createElement('div');
   }
 
   function createMarker(station: Station): void {
     const { latitude, longitude } = station.location;
-    const markerEl = createMarkerElement(station);
+    const markerEl = createMarkerElement();
     const markerOptions: MarkerOptions = {
       element: markerEl,
       anchor: 'bottom',
     };
 
+    createMarkerVNode(station, markerEl);
+
     markers.push({
-      stationId: station.id,
+      station,
       element: markerEl,
       marker: new Marker(markerOptions).setLngLat([longitude, latitude]),
     });
@@ -89,15 +92,26 @@ export function useStationMarkers(
     markers = [];
   }
 
-  function updateMarkers(): void {
+  function resetMarkers(): void {
     removeMarkers();
     initMarkers();
   }
 
+  function updateSelectedMarker(): void {
+    markers.forEach((marker) => {
+      createMarkerVNode(marker.station, marker.element);
+    });
+  }
+
   watch(
-    [stations, selectedFuelType, selectedStationId],
-    updateMarkers,
+    [stations, selectedFuelType],
+    resetMarkers,
     { deep: true },
+  );
+
+  watch(
+    selectedStationId,
+    updateSelectedMarker,
   );
 
   return {

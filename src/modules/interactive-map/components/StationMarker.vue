@@ -93,7 +93,7 @@ function handleSelect(): void {
 
   @apply inline-flex flex-col items-center;
   @apply cursor-pointer select-none outline-none;
-  @apply transition-transform duration-300;
+  @apply transition-transform duration-200 ease-out;
 
   &__card {
     @apply z-1;
@@ -102,7 +102,7 @@ function handleSelect(): void {
     @apply min-w-8 overflow-hidden;
     @apply bg-white;
     @apply backdrop-blur-md;
-    @apply transition-colors duration-200;
+    @apply transition-colors duration-200 ease-out;
 
     @variant dark {
       @apply border-gray-700/60;
@@ -117,7 +117,7 @@ function handleSelect(): void {
     @apply bg-white;
     @apply backdrop-blur-md;
     @apply rotate-45 shadow-sm;
-    @apply transition-colors duration-200;
+    @apply transition-colors duration-200 ease-out;
 
     @variant dark {
       @apply border-gray-700/60;

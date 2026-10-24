@@ -9,3 +9,9 @@ export function formatStationDistance(
 
   return `${formattedDistance}${formattedUnit}`;
 }
+
+export function formatStationClusterCount(clusterCount: number): string {
+  if (clusterCount < 1000) return `${clusterCount}`;
+
+  return `${(clusterCount / 1000).toFixed(1)}k`;
+}

@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { StationClusterMarkerEmits, StationClusterMarkerProps } from '../interactive-map.type';
+import { formatStationClusterCount } from '../utils/formatter.util.ts';
 
 const props = defineProps<StationClusterMarkerProps>();
 const emit = defineEmits<StationClusterMarkerEmits>();
-
-const formattedCount = computed((): string => {
-  if (props.count < 1000) return `${props.count}`;
-
-  return `${(props.count / 1000).toFixed(1)}k`;
-});
 
 const sizeClass = computed((): string => {
   if (props.count < 10) return 'cluster-marker--sm';
@@ -36,7 +31,7 @@ function handleSelect(): void {
     @keydown.enter="handleSelect"
     @keydown.space.prevent="handleSelect"
   >
-    <span>{{ formattedCount }}</span>
+    <span>{{ formatStationClusterCount(count) }}</span>
   </div>
 </template>
 

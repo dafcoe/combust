@@ -1,4 +1,4 @@
-import { formatStationDistance } from '../formatter.util.ts';
+import { formatStationClusterCount, formatStationDistance } from '../formatter.util.ts';
 
 describe('formatter.util', () => {
   describe('formatStationDistance', () => {
@@ -20,6 +20,18 @@ describe('formatter.util', () => {
 
     it('should return a dash for undefined', () => {
       expect(formatStationDistance(undefined)).toBe('—');
+    });
+  });
+
+  describe('formatStationClusterCount', () => {
+    it('formats point count when less than 1000', () => {
+      expect(formatStationClusterCount(5)).toBe('5');
+      expect(formatStationClusterCount(999)).toBe('999');
+    });
+
+    it('formats point count when greater than or equal to 1000', () => {
+      expect(formatStationClusterCount(1000)).toBe('1.0k');
+      expect(formatStationClusterCount(1500)).toBe('1.5k');
     });
   });
 });

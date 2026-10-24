@@ -11,14 +11,6 @@ describe('StationClusterMarker', () => {
       expect(wrapper.text()).toBe('5');
     });
 
-    it('formats point count when greater than or equal to 1000', () => {
-      const wrapper = mount(StationClusterMarker, {
-        props: { id: 1, count: 1500 },
-      });
-
-      expect(wrapper.text()).toBe('1.5k');
-    });
-
     it('has accessible role and tabindex attributes', () => {
       const wrapper = mount(StationClusterMarker, {
         props: { id: 1, count: 8 },

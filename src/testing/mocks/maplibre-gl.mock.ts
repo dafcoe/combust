@@ -9,6 +9,10 @@ export type MockMarkerInstance = {
 
 export type MockMapInstance = {
   addControl: ReturnType<typeof vi.fn>;
+  easeTo: ReturnType<typeof vi.fn>;
+  getBounds: ReturnType<typeof vi.fn>;
+  getZoom: ReturnType<typeof vi.fn>;
+  off: ReturnType<typeof vi.fn>;
   on: ReturnType<typeof vi.fn>;
   options?: MapOptions;
   remove: ReturnType<typeof vi.fn>;
@@ -16,14 +20,29 @@ export type MockMapInstance = {
   setStyle: ReturnType<typeof vi.fn>;
 };
 
+export const createDefaultMockBounds = () => ({
+  getWest: vi.fn(() => -180),
+  getSouth: vi.fn(() => -85),
+  getEast: vi.fn(() => 180),
+  getNorth: vi.fn(() => 85),
+});
+
 export const mockAddControl = vi.fn();
 export const mockSetStyle = vi.fn();
 export const mockMapRemove = vi.fn();
 export const mockOn = vi.fn();
+export const mockOff = vi.fn();
 export const mockResize = vi.fn();
+export const mockEaseTo = vi.fn();
+export const mockGetZoom = vi.fn((): number => 14);
+export const mockGetBounds = vi.fn(createDefaultMockBounds);
 
 export const mockMapInstance: MockMapInstance = {
   addControl: mockAddControl,
+  easeTo: mockEaseTo,
+  getBounds: mockGetBounds,
+  getZoom: mockGetZoom,
+  off: mockOff,
   on: mockOn,
   remove: mockMapRemove,
   resize: mockResize,
@@ -64,6 +83,12 @@ export const MockMarker = vi.fn(function (options?: MarkerOptions) {
 export function resetMaplibreGlMock(): void {
   mockMarkerInstances.length = 0;
   mockMapInstance.options = undefined;
+  mockGetBounds.mockImplementation(createDefaultMockBounds);
+  mockGetZoom.mockReturnValue(14);
+  mockGetBounds.mockClear();
+  mockGetZoom.mockClear();
+  mockEaseTo.mockClear();
+  mockOff.mockClear();
   mockAddControl.mockClear();
   mockSetStyle.mockClear();
   mockMapRemove.mockClear();

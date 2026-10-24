@@ -12,8 +12,14 @@ import { stationGalpLisbonFixture, stationRepsolMadridFixture } from '@/modules/
 import {
   cleanupScope,
   mockAddTo,
+  mockEaseTo,
+  mockGetBounds,
+  mockGetZoom,
+  mockMapInstance,
   mockMarkerInstances,
   mockMarkerRemove,
+  mockOff,
+  mockOn,
   mockSetLngLat,
   resetMaplibreGlMock,
   withScope,
@@ -22,12 +28,43 @@ import {
 vi.mock('maplibre-gl', () => import('@/testing/mocks/maplibre-gl.mock'));
 
 describe('useStationMarkers', () => {
-  let mockMapInstance: Map;
+  const nearbyGalpStationFixture: Station = {
+    ...stationGalpLisbonFixture,
+    id: 'PT-99999',
+    name: 'Galp Nearby',
+    location: {
+      ...stationGalpLisbonFixture.location,
+      latitude: stationGalpLisbonFixture.location.latitude + 0.0001,
+      longitude: stationGalpLisbonFixture.location.longitude + 0.0001,
+    },
+  };
+
+  function setMockViewport({
+    bbox = [-180, -85, 180, 85],
+    zoom = 14,
+  }: {
+    bbox?: [number, number, number, number];
+    zoom?: number;
+  } = {}): void {
+    mockGetZoom.mockReturnValue(zoom);
+    mockGetBounds.mockReturnValue({
+      getWest: vi.fn(() => bbox[0]),
+      getSouth: vi.fn(() => bbox[1]),
+      getEast: vi.fn(() => bbox[2]),
+      getNorth: vi.fn(() => bbox[3]),
+    });
+  }
+
+  function triggerMapMove(): void {
+    const moveEndCallback = mockOn.mock.calls.find(([event]) => event === 'moveend')?.[1];
+
+    moveEndCallback?.();
+  }
 
   beforeEach(() => {
     vi.clearAllMocks();
     resetMaplibreGlMock();
-    mockMapInstance = {} as unknown as Map;
+    setMockViewport();
   });
 
   afterEach(() => {
@@ -36,7 +73,7 @@ describe('useStationMarkers', () => {
 
   describe('initMarkers', () => {
     it('does not create markers when stations list is empty', () => {
-      const map = shallowRef<Map | null>(mockMapInstance);
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
       const stations = ref<Station[]>([]);
       const selectedFuelType = ref<FuelType | undefined>(undefined);
       const onSelectCallback = vi.fn();
@@ -50,8 +87,8 @@ describe('useStationMarkers', () => {
       expect(mockAddTo).not.toHaveBeenCalled();
     });
 
-    it('creates and attaches markers to the map for each station', () => {
-      const map = shallowRef<Map | null>(mockMapInstance);
+    it('creates and attaches markers to the map for each station in viewport', () => {
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
       const stations = ref<Station[]>([stationGalpLisbonFixture]);
       const selectedFuelType = ref<FuelType | undefined>('diesel');
       const onSelectCallback = vi.fn();
@@ -72,9 +109,10 @@ describe('useStationMarkers', () => {
 
       expect(mockAddTo).toHaveBeenCalledTimes(1);
       expect(mockAddTo).toHaveBeenCalledWith(mockMapInstance);
+      expect(mockOn).toHaveBeenCalledWith('moveend', expect.any(Function));
     });
 
-    it('creates markers but does not add to map when map.value is null', () => {
+    it('does not create markers when map.value is null', () => {
       const map = shallowRef<Map | null>(null);
       const stations = ref<Station[]>([stationGalpLisbonFixture]);
       const selectedFuelType = ref<FuelType | undefined>(undefined);
@@ -85,14 +123,14 @@ describe('useStationMarkers', () => {
 
       initMarkers();
 
-      expect(Marker).toHaveBeenCalledTimes(1);
+      expect(Marker).not.toHaveBeenCalled();
       expect(mockAddTo).not.toHaveBeenCalled();
     });
   });
 
   describe('marker selection', () => {
-    it('triggers onSelectCallback with selected station when a marker is clicked', async () => {
-      const map = shallowRef<Map | null>(mockMapInstance);
+    it('triggers onSelectCallback with selected station when an individual marker is clicked', async () => {
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
       const stations = ref<Station[]>([stationGalpLisbonFixture]);
       const selectedFuelType = ref<FuelType | undefined>(undefined);
       const onSelectCallback = vi.fn();
@@ -114,7 +152,7 @@ describe('useStationMarkers', () => {
     });
 
     it('updates marker selection in place without removing or recreating markers', async () => {
-      const map = shallowRef<Map | null>(mockMapInstance);
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
       const stations = ref<Station[]>([stationGalpLisbonFixture, stationRepsolMadridFixture]);
       const selectedFuelType = ref<FuelType | undefined>(undefined);
       const onSelectCallback = vi.fn();
@@ -124,6 +162,7 @@ describe('useStationMarkers', () => {
 
       initMarkers();
 
+      expect(mockMarkerInstances.length).toBe(2);
       const galpEl = mockMarkerInstances[0].options?.element as HTMLElement;
       const repsolEl = mockMarkerInstances[1].options?.element as HTMLElement;
 
@@ -149,9 +188,112 @@ describe('useStationMarkers', () => {
     });
   });
 
+  describe('clusters and interaction', () => {
+    it('creates a cluster marker when stations are close together at low zoom', () => {
+      setMockViewport({ zoom: 8 });
+
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
+      const stations = ref<Station[]>([stationGalpLisbonFixture, nearbyGalpStationFixture]);
+      const selectedFuelType = ref<FuelType | undefined>(undefined);
+      const onSelectCallback = vi.fn();
+      const { initMarkers } = withScope(() =>
+        useStationMarkers(map, stations, selectedFuelType, onSelectCallback),
+      );
+
+      initMarkers();
+
+      expect(Marker).toHaveBeenCalledTimes(1);
+      expect(Marker).toHaveBeenCalledWith(expect.objectContaining({ anchor: 'center' }));
+
+      const markerElement = mockMarkerInstances[0].options?.element as HTMLElement;
+      const clusterElement = markerElement?.querySelector('[data-testid="cluster-marker"]');
+
+      expect(clusterElement).not.toBeNull();
+      expect(clusterElement?.textContent).toBe('2');
+    });
+
+    it('zooms in with easeTo on cluster click', async () => {
+      setMockViewport({ zoom: 8 });
+
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
+      const stations = ref<Station[]>([stationGalpLisbonFixture, nearbyGalpStationFixture]);
+      const selectedFuelType = ref<FuelType | undefined>(undefined);
+      const onSelectCallback = vi.fn();
+      const { initMarkers } = withScope(() =>
+        useStationMarkers(map, stations, selectedFuelType, onSelectCallback),
+      );
+
+      initMarkers();
+
+      const markerElement = mockMarkerInstances[0].options?.element as HTMLElement;
+      const clusterElement = markerElement?.querySelector('[data-testid="cluster-marker"]') as HTMLElement;
+
+      clusterElement?.click();
+      await nextTick();
+
+      expect(mockEaseTo).toHaveBeenCalledTimes(1);
+      expect(mockEaseTo).toHaveBeenCalledWith(expect.objectContaining({
+        zoom: expect.any(Number),
+        center: expect.any(Array),
+      }));
+    });
+  });
+
+  describe('viewport diffing on map move', () => {
+    it('adds new markers and destroys off-screen markers when map moves', () => {
+      // Lisbon bbox only
+      setMockViewport({ bbox: [-9.3, 38.6, -9.0, 38.8], zoom: 14 });
+
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
+      const stations = ref<Station[]>([stationGalpLisbonFixture, stationRepsolMadridFixture]);
+      const selectedFuelType = ref<FuelType | undefined>(undefined);
+      const onSelectCallback = vi.fn();
+      const { initMarkers } = withScope(() =>
+        useStationMarkers(map, stations, selectedFuelType, onSelectCallback),
+      );
+
+      initMarkers();
+
+      // Only Lisbon is in viewport
+      expect(mockMarkerInstances.length).toBe(1);
+      expect(mockMarkerRemove).not.toHaveBeenCalled();
+
+      // Pan to Madrid only
+      setMockViewport({ bbox: [-3.9, 40.3, -3.5, 40.5], zoom: 14 });
+      triggerMapMove();
+
+      // Lisbon marker removed, Madrid marker added
+      expect(mockMarkerRemove).toHaveBeenCalledTimes(1);
+      expect(mockMarkerInstances.length).toBe(2);
+    });
+
+    it('preserves existing markers when they remain in viewport', () => {
+      setMockViewport({ bbox: [-180, -85, 180, 85], zoom: 14 });
+
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
+      const stations = ref<Station[]>([stationGalpLisbonFixture, stationRepsolMadridFixture]);
+      const selectedFuelType = ref<FuelType | undefined>(undefined);
+      const onSelectCallback = vi.fn();
+      const { initMarkers } = withScope(() =>
+        useStationMarkers(map, stations, selectedFuelType, onSelectCallback),
+      );
+
+      initMarkers();
+
+      expect(mockMarkerInstances.length).toBe(2);
+      expect(mockMarkerRemove).not.toHaveBeenCalled();
+
+      // Trigger move without changing visible stations
+      triggerMapMove();
+
+      expect(mockMarkerRemove).not.toHaveBeenCalled();
+      expect(Marker).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('reactivity to state changes', () => {
     it('updates markers when stations change', async () => {
-      const map = shallowRef<Map | null>(mockMapInstance);
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
       const stations = ref<Station[]>([stationGalpLisbonFixture]);
       const selectedFuelType = ref<FuelType | undefined>(undefined);
       const onSelectCallback = vi.fn();
@@ -166,12 +308,12 @@ describe('useStationMarkers', () => {
       stations.value = [stationGalpLisbonFixture, stationRepsolMadridFixture];
       await nextTick();
 
-      expect(mockMarkerRemove).toHaveBeenCalledTimes(1);
-      expect(Marker).toHaveBeenCalledTimes(3);
+      expect(Marker).toHaveBeenCalledTimes(2);
+      expect(mockMarkerInstances.length).toBe(2);
     });
 
-    it('updates markers when selectedFuelType changes', async () => {
-      const map = shallowRef<Map | null>(mockMapInstance);
+    it('updates station markers in place when selectedFuelType changes', async () => {
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
       const stations = ref<Station[]>([stationGalpLisbonFixture]);
       const selectedFuelType = ref<FuelType | undefined>(undefined);
       const onSelectCallback = vi.fn();
@@ -186,14 +328,15 @@ describe('useStationMarkers', () => {
       selectedFuelType.value = 'gasoline95';
       await nextTick();
 
-      expect(mockMarkerRemove).toHaveBeenCalledTimes(1);
-      expect(Marker).toHaveBeenCalledTimes(2);
+      // Station marker updated in place without destroying the map marker
+      expect(mockMarkerRemove).not.toHaveBeenCalled();
+      expect(Marker).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('removeMarkers', () => {
-    it('removes markers from map and cleans up elements when removeMarkers is called', () => {
-      const map = shallowRef<Map | null>(mockMapInstance);
+    it('removes markers from map, cleans up elements, and unregisters listener', () => {
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
       const stations = ref<Station[]>([stationGalpLisbonFixture]);
       const selectedFuelType = ref<FuelType | undefined>(undefined);
       const onSelectCallback = vi.fn();
@@ -206,6 +349,45 @@ describe('useStationMarkers', () => {
 
       removeMarkers();
       expect(mockMarkerRemove).toHaveBeenCalledTimes(1);
+      expect(mockOff).toHaveBeenCalledWith('moveend', expect.any(Function));
+    });
+  });
+
+  describe('reactivity to map instance changes', () => {
+    it('attaches listeners and creates markers when map becomes available', async () => {
+      const map = shallowRef<Map | null>(null);
+      const stations = ref<Station[]>([stationGalpLisbonFixture]);
+      const selectedFuelType = ref<FuelType | undefined>(undefined);
+      const onSelectCallback = vi.fn();
+      const { initMarkers } = withScope(() =>
+        useStationMarkers(map, stations, selectedFuelType, onSelectCallback),
+      );
+
+      initMarkers();
+      expect(Marker).not.toHaveBeenCalled();
+
+      map.value = mockMapInstance as unknown as Map;
+      await nextTick();
+
+      expect(Marker).toHaveBeenCalledTimes(1);
+      expect(mockOn).toHaveBeenCalledWith('moveend', expect.any(Function));
+    });
+
+    it('unregisters listener when map becomes null', async () => {
+      const map = shallowRef<Map | null>(mockMapInstance as unknown as Map);
+      const stations = ref<Station[]>([stationGalpLisbonFixture]);
+      const selectedFuelType = ref<FuelType | undefined>(undefined);
+      const onSelectCallback = vi.fn();
+      const { initMarkers } = withScope(() =>
+        useStationMarkers(map, stations, selectedFuelType, onSelectCallback),
+      );
+
+      initMarkers();
+
+      map.value = null;
+      await nextTick();
+
+      expect(mockOff).toHaveBeenCalledWith('moveend', expect.any(Function));
     });
   });
 });

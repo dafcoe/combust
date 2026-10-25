@@ -10,6 +10,7 @@ export type MockMarkerInstance = {
 export type MockMapInstance = {
   addControl: ReturnType<typeof vi.fn>;
   easeTo: ReturnType<typeof vi.fn>;
+  flyTo: ReturnType<typeof vi.fn>;
   getBounds: ReturnType<typeof vi.fn>;
   getZoom: ReturnType<typeof vi.fn>;
   off: ReturnType<typeof vi.fn>;
@@ -34,12 +35,14 @@ export const mockOn = vi.fn();
 export const mockOff = vi.fn();
 export const mockResize = vi.fn();
 export const mockEaseTo = vi.fn();
+export const mockFlyTo = vi.fn();
 export const mockGetZoom = vi.fn((): number => 14);
 export const mockGetBounds = vi.fn(createDefaultMockBounds);
 
 export const mockMapInstance: MockMapInstance = {
   addControl: mockAddControl,
   easeTo: mockEaseTo,
+  flyTo: mockFlyTo,
   getBounds: mockGetBounds,
   getZoom: mockGetZoom,
   off: mockOff,
@@ -88,6 +91,7 @@ export function resetMaplibreGlMock(): void {
   mockGetBounds.mockClear();
   mockGetZoom.mockClear();
   mockEaseTo.mockClear();
+  mockFlyTo.mockClear();
   mockOff.mockClear();
   mockAddControl.mockClear();
   mockSetStyle.mockClear();

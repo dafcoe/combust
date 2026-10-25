@@ -4,11 +4,7 @@ import {
   type MapOptions,
   NavigationControl,
 } from 'maplibre-gl';
-import {
-  type Ref,
-  shallowRef,
-  watch,
-} from 'vue';
+import { shallowRef, watch } from 'vue';
 import {
   DEFAULT_MAP_ZOOM,
   MAP_STYLE_DARK_URL,
@@ -17,17 +13,15 @@ import {
 import { useAppSettings } from '@/modules/app-settings';
 import { useGeolocation } from '@/modules/geolocation';
 
-export function useInteractiveMap(mapContainer: Ref<HTMLDivElement | null>) {
-  const map = shallowRef<Map | null>(null);
+const map = shallowRef<Map | null>(null);
 
+export function useInteractiveMap() {
   const { coords } = useGeolocation();
   const { isThemeDark } = useAppSettings();
 
-  function createMap(): void {
-    if (!mapContainer.value) return;
-
+  function createMap(container: HTMLDivElement): void {
     const mapOptions: MapOptions = {
-      container: mapContainer.value,
+      container,
       style: isThemeDark.value ? MAP_STYLE_DARK_URL : MAP_STYLE_LIGHT_URL,
       center: [coords.value.longitude, coords.value.latitude],
       zoom: DEFAULT_MAP_ZOOM,
@@ -61,8 +55,10 @@ export function useInteractiveMap(mapContainer: Ref<HTMLDivElement | null>) {
     );
   }
 
-  function initMap(): void {
-    createMap();
+  function initMap(container: HTMLDivElement): void {
+    if (map.value) return;
+
+    createMap(container);
     addControlsToMap();
     registerMapEventListeners();
   }

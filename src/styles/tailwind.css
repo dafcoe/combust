@@ -5,7 +5,7 @@
 @layer base {
   :root {
     --color-bg: #f8fafc;
-    --color-bg-subtle: #f1f5f9;
+    --color-bg-subtle: #ebeef3;
     --color-surface: rgba(255, 255, 255, 0.85);
     --color-surface-elevated: rgba(255, 255, 255, 0.95);
     --color-border: rgba(226, 232, 240, 0.85);

@@ -3,7 +3,7 @@ import {
   Map,
   NavigationControl,
 } from 'maplibre-gl';
-import { nextTick, ref } from 'vue';
+import { nextTick } from 'vue';
 import {
   DEFAULT_MAP_ZOOM,
   MAP_STYLE_DARK_URL,
@@ -44,28 +44,19 @@ describe('useInteractiveMap', () => {
   });
 
   afterEach(() => {
+    withScope(() => {
+      const { removeMap } = useInteractiveMap();
+      removeMap();
+    });
     cleanupScope();
   });
 
   describe('initMap', () => {
-    it('does not create map or add controls when mapContainer is null', () => {
-      const mapContainer = ref<HTMLDivElement | null>(null);
-      const { map, initMap } = withScope(() => useInteractiveMap(mapContainer));
-
-      initMap();
-
-      expect(Map).not.toHaveBeenCalled();
-      expect(map.value).toBeNull();
-      expect(mockAddControl).not.toHaveBeenCalled();
-      expect(mockOn).not.toHaveBeenCalled();
-    });
-
     it('creates and initializes map with default coordinates, zoom, and light style', () => {
       const containerElement = document.createElement('div');
-      const mapContainer = ref<HTMLDivElement | null>(containerElement);
-      const { map, initMap } = withScope(() => useInteractiveMap(mapContainer));
+      const { map, initMap } = withScope(() => useInteractiveMap());
 
-      initMap();
+      initMap(containerElement);
 
       expect(Map).toHaveBeenCalledTimes(1);
       expect(mockMapInstance.options).toEqual({
@@ -81,20 +72,18 @@ describe('useInteractiveMap', () => {
     it('creates map with dark style when isThemeDark is initially true', () => {
       mockIsThemeDark.value = true;
       const containerElement = document.createElement('div');
-      const mapContainer = ref<HTMLDivElement | null>(containerElement);
-      const { initMap } = withScope(() => useInteractiveMap(mapContainer));
+      const { initMap } = withScope(() => useInteractiveMap());
 
-      initMap();
+      initMap(containerElement);
 
       expect(mockMapInstance.options?.style).toBe(MAP_STYLE_DARK_URL);
     });
 
     it('adds attribution and navigation controls to the map', () => {
       const containerElement = document.createElement('div');
-      const mapContainer = ref<HTMLDivElement | null>(containerElement);
-      const { initMap } = withScope(() => useInteractiveMap(mapContainer));
+      const { initMap } = withScope(() => useInteractiveMap());
 
-      initMap();
+      initMap(containerElement);
 
       expect(AttributionControl).toHaveBeenCalledWith({ compact: true });
       expect(NavigationControl).toHaveBeenCalledWith({ showCompass: true, showZoom: true });
@@ -105,10 +94,9 @@ describe('useInteractiveMap', () => {
     it('registers map event listeners for load and error events', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const containerElement = document.createElement('div');
-      const mapContainer = ref<HTMLDivElement | null>(containerElement);
-      const { initMap } = withScope(() => useInteractiveMap(mapContainer));
+      const { initMap } = withScope(() => useInteractiveMap());
 
-      initMap();
+      initMap(containerElement);
 
       expect(mockOn).toHaveBeenCalledWith('load', expect.any(Function));
       expect(mockOn).toHaveBeenCalledWith('error', expect.any(Function));
@@ -124,15 +112,25 @@ describe('useInteractiveMap', () => {
 
       consoleErrorSpy.mockRestore();
     });
+
+    it('does not re-initialize map if already initialized', () => {
+      const containerElement = document.createElement('div');
+      const { initMap } = withScope(() => useInteractiveMap());
+
+      initMap(containerElement);
+      expect(Map).toHaveBeenCalledTimes(1);
+
+      initMap(containerElement);
+      expect(Map).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('reactivity to theme changes', () => {
     it('updates map style when isThemeDark changes after initialization', async () => {
       const containerElement = document.createElement('div');
-      const mapContainer = ref<HTMLDivElement | null>(containerElement);
-      const { initMap } = withScope(() => useInteractiveMap(mapContainer));
+      const { initMap } = withScope(() => useInteractiveMap());
 
-      initMap();
+      initMap(containerElement);
       expect(mockSetStyle).not.toHaveBeenCalled();
 
       mockIsThemeDark.value = true;
@@ -149,9 +147,7 @@ describe('useInteractiveMap', () => {
     });
 
     it('does not update map style when isThemeDark changes if map is not initialized', async () => {
-      const containerElement = document.createElement('div');
-      const mapContainer = ref<HTMLDivElement | null>(containerElement);
-      withScope(() => useInteractiveMap(mapContainer));
+      withScope(() => useInteractiveMap());
 
       mockIsThemeDark.value = true;
       await nextTick();
@@ -163,10 +159,9 @@ describe('useInteractiveMap', () => {
   describe('removeMap', () => {
     it('removes map and clears map reference', () => {
       const containerElement = document.createElement('div');
-      const mapContainer = ref<HTMLDivElement | null>(containerElement);
-      const { map, initMap, removeMap } = withScope(() => useInteractiveMap(mapContainer));
+      const { map, initMap, removeMap } = withScope(() => useInteractiveMap());
 
-      initMap();
+      initMap(containerElement);
       expect(map.value).toBe(mockMapInstance);
 
       removeMap();
@@ -176,9 +171,7 @@ describe('useInteractiveMap', () => {
     });
 
     it('does not throw or call remove when map was never initialized', () => {
-      const containerElement = document.createElement('div');
-      const mapContainer = ref<HTMLDivElement | null>(containerElement);
-      const { removeMap } = withScope(() => useInteractiveMap(mapContainer));
+      const { removeMap } = withScope(() => useInteractiveMap());
 
       expect(() => removeMap()).not.toThrow();
       expect(mockMapRemove).not.toHaveBeenCalled();
@@ -186,10 +179,9 @@ describe('useInteractiveMap', () => {
 
     it('does not update map style when isThemeDark changes after map removal', async () => {
       const containerElement = document.createElement('div');
-      const mapContainer = ref<HTMLDivElement | null>(containerElement);
-      const { initMap, removeMap } = withScope(() => useInteractiveMap(mapContainer));
+      const { initMap, removeMap } = withScope(() => useInteractiveMap());
 
-      initMap();
+      initMap(containerElement);
       removeMap();
 
       mockIsThemeDark.value = true;

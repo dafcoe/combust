@@ -6,6 +6,7 @@ export {
   mockAddControl,
   mockAddTo,
   mockEaseTo,
+  mockFlyTo,
   mockGetBounds,
   mockGetZoom,
   mockMapInstance,

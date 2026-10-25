@@ -19,7 +19,7 @@ const emits = defineEmits<InteractiveMapEmits>();
 
 const mapContainer = useTemplateRef('map-container');
 
-const { map, initMap, removeMap } = useInteractiveMap(mapContainer);
+const { map, initMap, removeMap } = useInteractiveMap();
 
 const {
   initMarker: initUserMarker,
@@ -37,7 +37,9 @@ const {
 );
 
 function initInteractiveMap(): void {
-  initMap();
+  if (!mapContainer.value) return;
+
+  initMap(mapContainer.value);
   initUserMarker();
   initStationMarkers();
 }

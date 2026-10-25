@@ -65,7 +65,7 @@ function handleSelect(): void {
     @keydown.space.prevent="handleSelect"
   >
     <div class="station-marker__card">
-      <div class="w-6 h-6 shrink-0">
+      <div class="station-marker__card-image-holder">
         <img
           :src="station.brandLogoUrl"
           :alt="station.brand"
@@ -108,6 +108,11 @@ function handleSelect(): void {
       @apply border-gray-700/60;
       @apply bg-gray-700/60;
     }
+  }
+
+  &__card-image-holder {
+    @apply shrink-0;
+    @apply w-7 h-6;
   }
 
   &__card-pin {

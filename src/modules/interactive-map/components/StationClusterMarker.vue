@@ -40,35 +40,42 @@ function handleSelect(): void {
 
 .cluster-marker {
   @apply flex items-center justify-center;
-  @apply rounded-full font-bold select-none cursor-pointer;
-  @apply bg-blue-600 text-white shadow-lg;
-  @apply ring-4 ring-white/90;
+  @apply rounded-full ring-2 ring-white/80;
+  @apply text-white text-xs font-bold select-none cursor-pointer;
+  @apply bg-cyan-600/80;
+  @apply w-8 h-8 shadow-sm;
   @apply transition-transform duration-200 outline-none;
-  @apply hover:scale-110 active:scale-95;
 
   @variant dark {
-    @apply bg-blue-500;
-    @apply ring-gray-800/90;
-  }
-
-  &--sm {
-    @apply w-9 h-9 text-xs;
+    @apply bg-cyan-500/80;
+    @apply ring-white/60;
   }
 
   &--md {
-    @apply w-11 h-11 text-sm bg-blue-700;
+    @apply bg-cyan-700/80;
+    @apply w-10 h-10;
 
     @variant dark {
-      @apply bg-blue-600;
+      @apply bg-cyan-600/80;
     }
   }
 
   &--lg {
-    @apply w-13 h-13 text-base bg-blue-800;
+    @apply w-12 h-12;
+    @apply text-base;
+    @apply bg-cyan-800/80;
 
     @variant dark {
-      @apply bg-blue-700;
+      @apply bg-cyan-700/80;
     }
+  }
+
+  &:hover {
+    @apply scale-110;
+  }
+
+  &:active {
+    @apply scale-95;
   }
 }
 </style>

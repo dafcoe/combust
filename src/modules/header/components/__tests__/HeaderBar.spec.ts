@@ -14,12 +14,13 @@ vi.mock('@/modules/geolocation', async (importOriginal) => {
   };
 });
 
-vi.mock('@/modules/interactive-map', () => ({
-  useInteractiveMapPositioner: () => ({
-    flyToCoordinates: vi.fn(),
-    flyToUserLocation: vi.fn().mockResolvedValue(undefined),
-  }),
-}));
+vi.mock('@/modules/interactive-map', async () => {
+  const { mockUseInteractiveMapPositioner } = await import('@/modules/interactive-map/index.testing.ts');
+
+  return {
+    useInteractiveMapPositioner: mockUseInteractiveMapPositioner,
+  };
+});
 
 describe('HeaderBar', () => {
   it('renders header container with semantic class', () => {

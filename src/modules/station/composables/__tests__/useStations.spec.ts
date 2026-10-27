@@ -8,47 +8,28 @@ import {
   mockCoords,
   resetGeolocationMock,
 } from '@/modules/geolocation/index.testing.ts';
-import type { IfcStation } from '@/modules/iberian-fuel';
 import {
   ifcStationBpLisbonFixture,
   ifcStationGalpLisbonFixture,
   ifcStationMoeveMadridFixture,
   ifcStationRepsolLisbonFixture,
   ifcStationRepsolMadridFixture,
-  ifcStationsFixture,
+  mockError,
+  mockFetchStations,
+  mockIfcStations,
+  mockIsLoading,
+  mockLastFetchedAt,
+  resetIberianFuelMock,
 } from '@/modules/iberian-fuel/index.testing.ts';
 import { cleanupScope, withScope } from '@/testing';
 
-const {
-  mockIfcStations,
-  mockIsLoading,
-  mockError,
-  mockLastFetchedAt,
-  mockFetchStations,
-} = await vi.hoisted(async () => {
-  const { ref } = await import('vue');
-
-  return {
-    mockIfcStations: ref<IfcStation[]>([]),
-    mockIsLoading: ref<boolean>(false),
-    mockError: ref<string | null>(null),
-    mockLastFetchedAt: ref<Date | null>(null),
-    mockFetchStations: vi.fn(),
-  };
-});
-
 vi.mock('@/modules/iberian-fuel', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/modules/iberian-fuel')>();
+  const { mockUseIberianFuel } = await import('@/modules/iberian-fuel/index.testing.ts');
 
   return {
     ...actual,
-    useIberianFuel: () => ({
-      stations: mockIfcStations,
-      isLoading: mockIsLoading,
-      error: mockError,
-      lastFetchedAt: mockLastFetchedAt,
-      fetchStations: mockFetchStations,
-    }),
+    useIberianFuel: mockUseIberianFuel,
   };
 });
 
@@ -77,10 +58,7 @@ describe('useStations', () => {
     vi.clearAllMocks();
     resetAppSettingsMock();
     resetGeolocationMock();
-    mockIfcStations.value = [...ifcStationsFixture];
-    mockIsLoading.value = false;
-    mockError.value = null;
-    mockLastFetchedAt.value = null;
+    resetIberianFuelMock();
     mockCoords.value = { ...lisbonGeolocationCoordinatesFixture };
     mockAppSettings.value = {
       ...DEFAULT_APP_SETTINGS,

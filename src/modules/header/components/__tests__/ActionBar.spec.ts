@@ -1,8 +1,10 @@
 import { mount } from '@vue/test-utils';
 import ActionBar from '../ActionBar.vue';
 import { mockIsLocating, resetGeolocationMock } from '@/modules/geolocation/index.testing.ts';
-
-const mockFlyToUserLocation = vi.fn().mockResolvedValue(undefined);
+import {
+  mockFlyToUserLocation,
+  resetInteractiveMapPositionerMock,
+} from '@/modules/interactive-map/index.testing.ts';
 
 vi.mock('@/modules/geolocation', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/modules/geolocation')>();
@@ -14,17 +16,19 @@ vi.mock('@/modules/geolocation', async (importOriginal) => {
   };
 });
 
-vi.mock('@/modules/interactive-map', () => ({
-  useInteractiveMapPositioner: () => ({
-    flyToCoordinates: vi.fn(),
-    flyToUserLocation: mockFlyToUserLocation,
-  }),
-}));
+vi.mock('@/modules/interactive-map', async () => {
+  const { mockUseInteractiveMapPositioner } = await import('@/modules/interactive-map/index.testing.ts');
+
+  return {
+    useInteractiveMapPositioner: mockUseInteractiveMapPositioner,
+  };
+});
 
 describe('ActionBar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetGeolocationMock();
+    resetInteractiveMapPositionerMock();
   });
 
   describe('rendering', () => {

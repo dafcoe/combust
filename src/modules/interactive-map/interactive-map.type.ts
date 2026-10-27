@@ -1,4 +1,4 @@
-import type { Marker } from 'maplibre-gl';
+import type { FlyToOptions, Marker } from 'maplibre-gl';
 import type { PointFeature } from 'supercluster';
 import type { FuelType } from '@/modules/fuel';
 import type { Station } from '@/modules/station';
@@ -11,6 +11,8 @@ export type InteractiveMapProps = {
 export type InteractiveMapEmits = {
   (event: 'selectStation', station: Station): void;
 };
+
+export type InteractiveMapFlyToOptions = Pick<FlyToOptions, 'animate'>;
 
 export type StationMarkerProps = {
   station: Station;

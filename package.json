@@ -53,5 +53,6 @@
   },
   "onlyBuiltDependencies": [
     "@parcel/watcher"
-  ]
+  ],
+  "packageManager": "pnpm@11.1.3"
 }

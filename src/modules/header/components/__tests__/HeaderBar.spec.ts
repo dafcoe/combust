@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import ActionBar from '../ActionBar.vue';
-import FilterBar from '../FilterBar.vue';
 import HeaderBar from '../HeaderBar.vue';
+import RefinementBar from '../RefinementBar.vue';
 import { AppLogo } from '@/modules/app-logo';
 
 vi.mock('@/modules/geolocation', async (importOriginal) => {
@@ -30,7 +30,7 @@ describe('HeaderBar', () => {
     expect(header.exists()).toBe(true);
   });
 
-  it('renders AppLogo, ActionBar, and FilterBar sub-components', () => {
+  it('renders AppLogo, ActionBar, and RefinementBar sub-components', () => {
     const wrapper = mount(HeaderBar);
 
     const appLogo = wrapper.findComponent(AppLogo);
@@ -39,10 +39,10 @@ describe('HeaderBar', () => {
 
     const actionBar = wrapper.findComponent(ActionBar);
     expect(actionBar.exists()).toBe(true);
-    expect(actionBar.classes()).toContain('header-bar__actions');
+    expect(actionBar.classes()).toContain('header-bar__action-bar');
 
-    const filterBar = wrapper.findComponent(FilterBar);
-    expect(filterBar.exists()).toBe(true);
-    expect(filterBar.classes()).toContain('header-bar__filters');
+    const refinementBar = wrapper.findComponent(RefinementBar);
+    expect(refinementBar.exists()).toBe(true);
+    expect(refinementBar.classes()).toContain('header-bar__refinement-bar');
   });
 });

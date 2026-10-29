@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ActionBar from './ActionBar.vue';
-import FilterBar from './FilterBar.vue';
+import RefinementBar from './RefinementBar.vue';
 import { AppLogo } from '@/modules/app-logo';
 </script>
 
@@ -8,9 +8,9 @@ import { AppLogo } from '@/modules/app-logo';
   <header class="header-bar">
     <AppLogo class="header-bar__logo" />
 
-    <ActionBar class="header-bar__actions" />
+    <ActionBar class="header-bar__action-bar" />
 
-    <FilterBar class="header-bar__filters" />
+    <RefinementBar class="header-bar__refinement-bar" />
   </header>
 </template>
 
@@ -30,11 +30,11 @@ import { AppLogo } from '@/modules/app-logo';
     @apply order-1;
   }
 
-  &__actions {
+  &__action-bar {
     @apply order-2 md:order-3;
   }
 
-  &__filters {
+  &__refinement-bar {
     @apply order-3 md:order-2;
     @apply w-full md:max-w-3/5;
   }

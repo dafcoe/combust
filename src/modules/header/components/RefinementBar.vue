@@ -8,25 +8,25 @@ import {
 
 <template>
   <div
-    class="filter-bar"
+    class="refinement-bar"
     role="search"
   >
-    <div class="filter-bar__search">
+    <div class="refinement-bar__search">
       <Search
-        class="filter-bar__search-icon"
+        class="refinement-bar__search-icon"
         :size="18"
         aria-hidden="true"
       />
 
-      <span class="filter-bar__placeholder">
+      <span class="refinement-bar__placeholder">
         Search stations or cities...
       </span>
     </div>
 
-    <div class="filter-bar__actions">
+    <div class="refinement-bar__actions">
       <button
         type="button"
-        class="filter-bar__btn"
+        class="refinement-bar__btn"
         aria-label="Map view options"
       >
         <Map
@@ -37,8 +37,8 @@ import {
 
       <button
         type="button"
-        class="filter-bar__btn"
-        aria-label="Filter fuel stations"
+        class="refinement-bar__btn"
+        aria-label="Filter stations"
       >
         <SlidersHorizontal
           :size="18"
@@ -52,7 +52,7 @@ import {
 <style scoped lang="scss">
 @reference '../../../styles/tailwind.css';
 
-.filter-bar {
+.refinement-bar {
   @apply flex items-center justify-between gap-4;
   @apply py-1 px-2;
   @apply rounded-xl select-none;
